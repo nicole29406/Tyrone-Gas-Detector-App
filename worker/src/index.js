@@ -17,6 +17,7 @@ const MAX_MESSAGE_LEN = 480; // 3 SMS segments
 // E.164 ("+256771..."). Keys must match the `region` strings stored in the
 // app's account records.
 const REGION_DIAL_CODE = {
+  Zimbabwe: "+263",
   Uganda: "+256",
   Kenya: "+254",
   Tanzania: "+255",
@@ -24,6 +25,10 @@ const REGION_DIAL_CODE = {
   Burundi: "+257",
   "South Sudan": "+211",
   "DR Congo": "+243",
+  Zambia: "+260",
+  Botswana: "+267",
+  Mozambique: "+258",
+  Malawi: "+265",
   Nigeria: "+234",
   Ghana: "+233",
   Ethiopia: "+251",
@@ -41,7 +46,7 @@ function normalisePhone(raw, region) {
   const trimmed = raw.replace(/[\s\-()]/g, "");
   if (trimmed.startsWith("+")) return trimmed;
   if (trimmed.startsWith("00")) return "+" + trimmed.slice(2);
-  const dial = REGION_DIAL_CODE[region] || "+256"; // default UG since this app's target users
+  const dial = REGION_DIAL_CODE[region] || "+263"; // default to ZW (primary user region)
   if (trimmed.startsWith("0")) return dial + trimmed.slice(1);
   return dial + trimmed;
 }

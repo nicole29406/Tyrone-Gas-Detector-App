@@ -6,6 +6,7 @@ const ACCOUNTS_KEY = "tyrone.accounts.v1";
 const SESSION_KEY = "tyrone.session.v1";
 
 export const REGIONS = [
+  "Zimbabwe",
   "Uganda",
   "Kenya",
   "Tanzania",
@@ -13,6 +14,10 @@ export const REGIONS = [
   "Burundi",
   "South Sudan",
   "DR Congo",
+  "Zambia",
+  "Botswana",
+  "Mozambique",
+  "Malawi",
   "Nigeria",
   "Ghana",
   "Ethiopia",
