@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background: emerald-on-black square with subtle radial glow -->
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#052e22"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.45"/>
+      <stop offset="70%" stop-color="#10b981" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="220" fill="url(#glow)"/>
+
+  <!-- Outer dashed ring evoking the gauge -->
+  <circle cx="256" cy="256" r="200" fill="none" stroke="#10b981" stroke-width="6" stroke-opacity="0.35" stroke-dasharray="2 10"/>
+
+  <!-- Radiation/hazard trefoil — the brand mark used in-app -->
+  <g transform="translate(256 256)" fill="#34d399">
+    <!-- Center disc -->
+    <circle r="36" />
+    <!-- Three radiating blades (60° wedges, rotated 0/120/240) -->
+    <g>
+      <!-- One blade defined, then cloned at 120° and 240° -->
+      <path id="blade" d="M -54 -94 A 108 108 0 0 1 54 -94 L 26 -45 A 52 52 0 0 0 -26 -45 Z"/>
+      <use href="#blade" transform="rotate(120)"/>
+      <use href="#blade" transform="rotate(240)"/>
+    </g>
+  </g>
+
+  <!-- Wordmark at the bottom -->
+  <text x="256" y="450" text-anchor="middle"
+        font-family="system-ui, -apple-system, 'Segoe UI', Inter, sans-serif"
+        font-weight="800"
+        font-size="44"
+        letter-spacing="6"
+        fill="#10b981">TYRONE</text>
+</svg>
