@@ -34,6 +34,11 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          # Worker URL injected into the bundle. Set with:
+          #   gh variable set VITE_SMS_ENDPOINT --body "https://tyrone-sms.<sub>.workers.dev"
+          # If unset, the app falls back to simulation-only SMS.
+          VITE_SMS_ENDPOINT: ${{ vars.VITE_SMS_ENDPOINT }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

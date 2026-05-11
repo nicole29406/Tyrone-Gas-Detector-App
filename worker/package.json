@@ -1,0 +1,18 @@
+{
+  "name": "tyrone-sms-worker",
+  "version": "0.1.0",
+  "description": "Cloudflare Worker that proxies TYRONE DETECTOR SMS alerts to Twilio",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail",
+    "secret:twilio:sid": "wrangler secret put TWILIO_ACCOUNT_SID",
+    "secret:twilio:token": "wrangler secret put TWILIO_AUTH_TOKEN",
+    "secret:twilio:from": "wrangler secret put TWILIO_FROM_NUMBER"
+  },
+  "devDependencies": {
+    "wrangler": "^3.78.0"
+  }
+}
