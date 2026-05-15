@@ -19,6 +19,50 @@ export function endpointHost() {
   }
 }
 
+// Send a one-off test message. Returns the raw Worker response so the UI
+// can surface Twilio's exact error code/message when diagnosing delivery
+// problems (wrong FROM number, unverified recipient, etc.).
+export async function sendTestSms({ to, region, name }) {
+  if (!ENDPOINT) {
+    return {
+      ok: false,
+      reason: "no-endpoint",
+      message: "SMS endpoint not configured.",
+    };
+  }
+  if (!to) {
+    return { ok: false, reason: "no-phone", message: "Recipient missing." };
+  }
+  const firstName = name?.split(" ")[0] || "there";
+  const body =
+    `TYRONE DETECTOR test — hi ${firstName}, your SMS alerts are working. ` +
+    `You'll receive a message like this if gas is detected at home.`;
+  try {
+    const res = await fetch(`${ENDPOINT}/api/sms`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ to, region, message: body }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      return {
+        ok: false,
+        status: res.status,
+        reason: data.error || `HTTP ${res.status}`,
+        code: data.code,
+        hint: data.hint,
+      };
+    }
+    return { ok: true, sid: data.sid, twilioStatus: data.status, to: data.to };
+  } catch (err) {
+    return {
+      ok: false,
+      reason: "network-error",
+      message: err.message || String(err),
+    };
+  }
+}
+
 function composeAlertMessage({ user, gas, ppm }) {
   const firstName = user?.fullName?.split(" ")[0] || "User";
   const reading = gas && ppm ? ` ${gas} ${ppm} PPM.` : "";

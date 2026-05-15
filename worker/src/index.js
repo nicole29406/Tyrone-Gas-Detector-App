@@ -13,6 +13,29 @@ const ALLOWED_ORIGINS = [
 const E164_REGEX = /^\+\d{8,15}$/;
 const MAX_MESSAGE_LEN = 480; // 3 SMS segments
 
+// Claude chatbot config
+const CLAUDE_MODEL = "claude-sonnet-4-5";
+const CHAT_MAX_TOKENS = 600;
+const CHAT_MAX_INPUT_CHARS = 4000; // bounds API cost per request
+const CHAT_SYSTEM_PROMPT = `You are GasBot — the safety assistant inside TYRONE DETECTOR, a gas leak detection mobile app.
+
+You help users with:
+- Recognising and responding to gas leaks
+- Evacuation procedures and emergency steps
+- Sensor calibration and troubleshooting (MQ-series modules, ESP32, Bluetooth gas sensors)
+- Gas safety prevention tips for homes
+- Reading interpretation (PPM, LEL%)
+- Emergency contacts (Emergency Services 0771938039, Gas Emergency Line 0788246984, Fire 112)
+
+GUIDELINES:
+- Be concise. Use short bullet points for steps and lists.
+- Be authoritative about safety — never minimise risk.
+- If the question is unrelated to gas safety, briefly mention what you can help with instead.
+- Keep responses under 180 words when possible.
+- Never claim to physically intervene — you can only inform and guide.
+
+If a user reports an ACTIVE emergency, your first response must be the evacuation + emergency-call protocol.`;
+
 // Country-dial-code map for normalising local-format numbers ("0771...") to
 // E.164 ("+256771..."). Keys must match the `region` strings stored in the
 // app's account records.
@@ -87,15 +110,23 @@ export default {
       return json(
         {
           ok: true,
-          configured: Boolean(
-            env.TWILIO_ACCOUNT_SID &&
-              env.TWILIO_AUTH_TOKEN &&
-              env.TWILIO_FROM_NUMBER
-          ),
+          configured: {
+            sms: Boolean(
+              env.TWILIO_ACCOUNT_SID &&
+                env.TWILIO_AUTH_TOKEN &&
+                env.TWILIO_FROM_NUMBER
+            ),
+            chat: Boolean(env.ANTHROPIC_API_KEY),
+          },
         },
         {},
         origin
       );
+    }
+
+    // Claude chatbot endpoint
+    if (request.method === "POST" && url.pathname === "/api/chat") {
+      return handleChat(request, env, origin);
     }
 
     if (request.method !== "POST" || url.pathname !== "/api/sms") {
@@ -215,3 +246,120 @@ export default {
     );
   },
 };
+
+// ---------------------------------------------------------------------------
+// Claude chat handler. Accepts:
+//   { messages: [{ role: "user" | "assistant", content: "..." }, ...] }
+// Forwards to Anthropic's Messages API using ANTHROPIC_API_KEY secret.
+// Falls back to 503 if the key isn't configured — the frontend then uses its
+// built-in rule-based bot.
+async function handleChat(request, env, origin) {
+  if (!env.ANTHROPIC_API_KEY) {
+    return json(
+      {
+        error: "Chatbot not configured",
+        hint:
+          "Set the secret with: cd worker && wrangler secret put ANTHROPIC_API_KEY",
+      },
+      { status: 503 },
+      origin
+    );
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: "Invalid JSON" }, { status: 400 }, origin);
+  }
+
+  const { messages } = body || {};
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return json(
+      { error: "'messages' must be a non-empty array" },
+      { status: 400 },
+      origin
+    );
+  }
+
+  // Sanitise + bound input size
+  const cleaned = [];
+  let totalChars = 0;
+  for (const m of messages.slice(-12) /* keep last 12 turns max */) {
+    if (m.role !== "user" && m.role !== "assistant") continue;
+    const content = typeof m.content === "string" ? m.content : "";
+    if (!content) continue;
+    totalChars += content.length;
+    if (totalChars > CHAT_MAX_INPUT_CHARS) break;
+    cleaned.push({ role: m.role, content });
+  }
+  if (cleaned.length === 0) {
+    return json({ error: "No valid messages" }, { status: 400 }, origin);
+  }
+  // Claude requires the first message to be from the user
+  if (cleaned[0].role !== "user") cleaned.shift();
+  if (cleaned.length === 0) {
+    return json(
+      { error: "First message must be from user" },
+      { status: 400 },
+      origin
+    );
+  }
+
+  let res, data;
+  try {
+    res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model: CLAUDE_MODEL,
+        max_tokens: CHAT_MAX_TOKENS,
+        system: CHAT_SYSTEM_PROMPT,
+        messages: cleaned,
+      }),
+    });
+    data = await res.json();
+  } catch (err) {
+    return json(
+      { error: "Failed to reach Anthropic", details: String(err) },
+      { status: 502 },
+      origin
+    );
+  }
+
+  if (!res.ok) {
+    return json(
+      {
+        error: data?.error?.message || "Anthropic rejected the request",
+        type: data?.error?.type,
+        status: res.status,
+      },
+      { status: res.status },
+      origin
+    );
+  }
+
+  // Extract text from the response. Claude returns content as an array of
+  // typed blocks; we concatenate all text blocks.
+  const text = (data.content || [])
+    .filter((b) => b.type === "text")
+    .map((b) => b.text)
+    .join("")
+    .trim();
+
+  return json(
+    {
+      ok: true,
+      text,
+      model: data.model,
+      stopReason: data.stop_reason,
+      usage: data.usage,
+    },
+    {},
+    origin
+  );
+}

@@ -109,6 +109,11 @@ export default function App() {
 
   const [alarmActive, setAlarmActive] = useState(false);
   const [escalationActive, setEscalationActive] = useState(false);
+  // Once the user silences the alarm, this is set. It blocks the monitoring
+  // loop from re-firing the alarm while readings are still in the danger
+  // zone. Auto-resets when readings return to SAFE so a *new* gas event
+  // will trigger a fresh alarm.
+  const [alarmAcknowledged, setAlarmAcknowledged] = useState(false);
   const lastAlarmLogRef = useRef(0);
 
   // Reset on user switch
@@ -120,6 +125,7 @@ export default function App() {
     setLastUpdated(Date.now());
     setAlarmActive(false);
     setEscalationActive(false);
+    setAlarmAcknowledged(false);
     setConnectedSensor(null);
     setScreen("home");
   }, [user?.id]);
@@ -152,7 +158,9 @@ export default function App() {
         const next = nextLiveReading(prev);
         setLastUpdated(Date.now());
         const status = statusForReading(next, settings.threshold);
-        if (status === STATUS.DANGER) {
+        // Skip alarm re-fire if user has acknowledged — they're aware the gas
+        // is still elevated and don't need the audio + overlay again.
+        if (status === STATUS.DANGER && !alarmAcknowledged) {
           setAlarmActive(true);
           const now = Date.now();
           if (now - lastAlarmLogRef.current > ALARM_LOG_COOLDOWN_MS) {
@@ -181,7 +189,13 @@ export default function App() {
     }, 1000);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, connectedSensor?.id, settings.threshold, settings.vibrationOn]);
+  }, [
+    user?.id,
+    connectedSensor?.id,
+    settings.threshold,
+    settings.vibrationOn,
+    alarmAcknowledged,
+  ]);
 
   // Periodically pick a fresh "last detected gas" candidate so the log entries
   // aren't all the same gas. Cheap — once a minute.
@@ -198,12 +212,15 @@ export default function App() {
     return () => stopAlarm();
   }, [alarmActive, settings.soundOn]);
 
-  // Auto-clear alarm when reading returns to SAFE
+  // Auto-clear alarm + acknowledged flag when reading returns to SAFE so the
+  // next gas event triggers a fresh alarm.
   useEffect(() => {
-    if (!alarmActive) return;
     const status = statusForReading(liveReading, settings.threshold);
-    if (status === STATUS.SAFE) setAlarmActive(false);
-  }, [liveReading, settings.threshold, alarmActive]);
+    if (status === STATUS.SAFE) {
+      if (alarmActive) setAlarmActive(false);
+      if (alarmAcknowledged) setAlarmAcknowledged(false);
+    }
+  }, [liveReading, settings.threshold, alarmActive, alarmAcknowledged]);
 
   // SMS escalation only triggers when a sensor is paired
   useEffect(() => {
@@ -228,6 +245,16 @@ export default function App() {
     saveSession(null);
     setUser(null);
     setShowAuth(false);
+  };
+
+  // Single source of truth for "turn the alarm off": stops audio, closes the
+  // overlay, cancels SMS escalation, and sets the acknowledged flag so the
+  // monitoring loop won't immediately re-fire.
+  const handleSilenceAlarm = () => {
+    setAlarmActive(false);
+    setEscalationActive(false);
+    setAlarmAcknowledged(true);
+    stopAlarm();
   };
 
   const goBack = () => {
@@ -282,6 +309,7 @@ export default function App() {
             temperature={temperature}
             lastUpdated={lastUpdated}
             connectedSensor={connectedSensor}
+            alarmAcknowledged={alarmAcknowledged}
             onQuickAction={handleQuickAction}
             onPairSensor={() => setSensorPairOpen(true)}
           />
@@ -340,10 +368,7 @@ export default function App() {
             units={settings.units}
             gas={lastGas}
             emergencyContact={settings.emergencyContact}
-            onSilence={() => {
-              setAlarmActive(false);
-              setEscalationActive(false);
-            }}
+            onSilence={handleSilenceAlarm}
           />
         )}
 
@@ -353,7 +378,7 @@ export default function App() {
           additionalContacts={settings.additionalContacts || []}
           gas={lastGas}
           ppm={liveReading}
-          onAcknowledge={() => setEscalationActive(false)}
+          onAcknowledge={handleSilenceAlarm}
         />
       </main>
 

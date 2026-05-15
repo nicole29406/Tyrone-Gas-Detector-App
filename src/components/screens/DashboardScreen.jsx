@@ -8,6 +8,7 @@ import {
   MessageCircle,
   Bluetooth,
   Radar,
+  BellOff,
 } from "lucide-react";
 import Card, { SectionTitle } from "../ui/Card";
 import {
@@ -33,15 +34,35 @@ export default function DashboardScreen({
   temperature,
   lastUpdated,
   connectedSensor,
+  alarmAcknowledged,
   onQuickAction, // (action) => void
   onPairSensor,
 }) {
   const status = statusForReading(liveReading, threshold);
   const accent = statusAccent(status);
   const sensorReady = !!connectedSensor;
+  const stillDanger = status === "DANGER";
 
   return (
     <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-3 pb-5 bg-slate-50">
+      {/* "Alarm silenced" reminder banner — shown while user has acknowledged
+          a still-active gas alert. Auto-dismisses when readings hit SAFE. */}
+      {alarmAcknowledged && stillDanger && (
+        <div className="mb-3 rounded-2xl bg-red-50 ring-1 ring-red-200 px-3 py-2.5 flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
+            <BellOff size={15} className="text-red-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[12px] font-bold text-red-700">
+              Alarm silenced — gas is still elevated
+            </div>
+            <div className="text-[11px] text-red-600/80 mt-0.5">
+              The alarm will re-arm once readings return to safe.
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Headline card: live gas level OR "Pair sensor" CTA */}
       {sensorReady ? (
         <Card
