@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import {
-  Radiation,
+  Droplet,
   Eye,
   EyeOff,
   Mail,
@@ -10,95 +10,79 @@ import {
   MapPin,
   Lock,
   Sparkles,
-  LogIn,
-  UserPlus,
-  ChevronRight,
   Plus,
+  ChevronRight,
 } from "lucide-react";
 import {
   REGIONS,
   createAccount,
-  loginAccount,
   loadAccounts,
-  validateEmail,
-  validatePhone,
-  validateDob,
-  validateFullName,
-  validatePassword,
+  loginAccount,
   passwordStrength,
+  saveSession,
   strengthLabel,
   suggestEmail,
-  saveSession,
+  validateDob,
+  validateEmail,
+  validateFullName,
+  validatePassword,
+  validatePhone,
 } from "../lib/auth";
 
 const STRENGTH_COLORS = [
-  "bg-zinc-800",
+  "bg-slate-200",
   "bg-red-500",
   "bg-orange-400",
   "bg-amber-400",
   "bg-lime-400",
-  "bg-emerald-400",
+  "bg-emerald-500",
 ];
+
+const inputCls =
+  "flex-1 bg-transparent py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none";
 
 function Field({ icon: Icon, error, children }) {
   return (
     <div>
       <div
         className={
-          "flex items-center gap-2 bg-zinc-900 ring-1 rounded-xl px-3 " +
-          (error ? "ring-red-500/60" : "ring-zinc-800 focus-within:ring-emerald-400/60")
+          "flex items-center gap-2 bg-white ring-1 rounded-xl px-3 transition-colors " +
+          (error
+            ? "ring-red-300"
+            : "ring-slate-200 focus-within:ring-brand-500")
         }
       >
-        {Icon && <Icon size={15} className="text-zinc-500" />}
+        {Icon && <Icon size={15} className="text-slate-400" />}
         {children}
       </div>
-      {error && <div className="text-[11px] text-red-400 mt-1 ml-1">{error}</div>}
+      {error && (
+        <div className="text-[11px] text-red-600 mt-1 ml-1">{error}</div>
+      )}
     </div>
   );
 }
-
-const inputCls =
-  "flex-1 bg-transparent py-2.5 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none";
 
 export default function AuthScreen({ onAuthed }) {
   const [mode, setMode] = useState("login"); // 'login' | 'signup'
   const accounts = useMemo(loadAccounts, []);
 
   return (
-    <div className="min-h-screen w-full bg-black text-zinc-100 flex items-center justify-center p-4 sm:p-6">
-      <div className="w-full sm:max-w-[420px] bg-zinc-950 sm:rounded-[36px] ring-1 sm:ring-4 ring-zinc-800 px-5 py-6 sm:py-8 flex flex-col">
+    <div className="min-h-screen w-full bg-slate-100 flex items-center justify-center p-4 sm:p-6">
+      <div className="w-full sm:max-w-[420px] bg-white sm:rounded-[32px] ring-1 sm:ring-2 ring-slate-200 px-5 py-6 sm:py-8 flex flex-col shadow-card-lg">
         <Brand />
 
-        <div className="mt-6 grid grid-cols-2 gap-1 p-1 bg-zinc-900 rounded-xl ring-1 ring-zinc-800">
-          <TabButton
-            active={mode === "login"}
-            onClick={() => setMode("login")}
-            icon={LogIn}
-            label="Log in"
+        {mode === "login" ? (
+          <LoginForm
+            onAuthed={onAuthed}
+            onSwitchMode={() => setMode("signup")}
+            accounts={accounts}
           />
-          <TabButton
-            active={mode === "signup"}
-            onClick={() => setMode("signup")}
-            icon={UserPlus}
-            label="Sign up"
+        ) : (
+          <SignupForm
+            onAuthed={onAuthed}
+            onSwitchMode={() => setMode("login")}
           />
-        </div>
-
-        <div className="mt-5">
-          {mode === "login" ? (
-            <LoginForm onAuthed={onAuthed} accounts={accounts} />
-          ) : (
-            <SignupForm onAuthed={onAuthed} />
-          )}
-        </div>
-
-        {accounts.length > 0 && mode === "login" && (
-          <SavedAccounts accounts={accounts} onAuthed={onAuthed} />
         )}
-
-        <p className="mt-6 text-center text-[10px] text-zinc-600">
-          TYRONE DETECTOR · v0.2 · Demo authentication (stored locally)
-        </p>
       </div>
     </div>
   );
@@ -106,44 +90,24 @@ export default function AuthScreen({ onAuthed }) {
 
 function Brand() {
   return (
-    <div className="flex flex-col items-center">
-      <div className="relative w-14 h-14 rounded-2xl bg-emerald-500/15 ring-1 ring-emerald-400/40 flex items-center justify-center">
-        <Radiation size={28} className="text-emerald-400" />
-        <span className="absolute inset-0 rounded-2xl bg-emerald-400/10 animate-ping-slow" />
+    <div className="flex flex-col items-center text-center">
+      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-600 to-brand-800 flex items-center justify-center shadow-lg">
+        <Droplet size={28} className="text-white" fill="currentColor" />
       </div>
-      <div className="mt-3 text-[10px] tracking-[0.35em] text-emerald-400 font-semibold">
-        TYRONE
+      <div className="mt-3 text-base font-extrabold tracking-wide text-brand-700 leading-tight">
+        GAS LEAKAGE
       </div>
-      <div className="text-xl font-extrabold tracking-[0.2em] text-zinc-100">
-        DETECTOR
+      <div className="text-base font-extrabold tracking-wide text-brand-700 leading-tight">
+        DETECTION SYSTEM
       </div>
-      <div className="mt-1 text-[11px] text-zinc-500">
-        Gas leak detection & safety
-      </div>
+      <div className="mt-1 text-[12px] text-slate-500">Sign in to continue</div>
     </div>
   );
 }
 
-function TabButton({ active, onClick, icon: Icon, label }) {
-  return (
-    <button
-      onClick={onClick}
-      className={
-        "flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold tracking-widest transition-colors " +
-        (active
-          ? "bg-emerald-500 text-black"
-          : "text-zinc-400 hover:text-zinc-200")
-      }
-    >
-      <Icon size={13} />
-      {label}
-    </button>
-  );
-}
+// ---------------- LOGIN ----------------
 
-// ------------------------------ LOGIN ------------------------------
-
-function LoginForm({ onAuthed }) {
+function LoginForm({ onAuthed, onSwitchMode, accounts }) {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -167,13 +131,13 @@ function LoginForm({ onAuthed }) {
   };
 
   return (
-    <form onSubmit={submit} className="space-y-3">
-      <Field icon={User}>
+    <form onSubmit={submit} className="mt-6 space-y-3">
+      <Field icon={Mail}>
         <input
           autoFocus
           value={identifier}
           onChange={(e) => setIdentifier(e.target.value)}
-          placeholder="Username, phone, or email"
+          placeholder="Email / Username"
           className={inputCls}
         />
       </Field>
@@ -189,14 +153,28 @@ function LoginForm({ onAuthed }) {
         <button
           type="button"
           onClick={() => setShowPw((s) => !s)}
-          className="text-zinc-500 hover:text-zinc-300 pr-1"
+          className="text-slate-400 hover:text-slate-600 pr-1"
         >
           {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
         </button>
       </Field>
 
+      <div className="flex justify-end -mt-1">
+        <button
+          type="button"
+          className="text-[12px] text-brand-700 hover:text-brand-800 font-semibold"
+          onClick={() =>
+            setError(
+              "Password reset is not yet wired up in this demo. Use 'Switch / add account' from Profile to re-create an account."
+            )
+          }
+        >
+          Forgot Password?
+        </button>
+      </div>
+
       {error && (
-        <div className="text-[11px] text-red-400 bg-red-500/10 ring-1 ring-red-500/30 rounded-lg px-3 py-2">
+        <div className="text-[11px] text-red-600 bg-red-50 ring-1 ring-red-200 rounded-lg px-3 py-2">
           {error}
         </div>
       )}
@@ -204,45 +182,61 @@ function LoginForm({ onAuthed }) {
       <button
         type="submit"
         disabled={busy}
-        className="w-full bg-emerald-500 disabled:bg-zinc-700 text-black font-bold tracking-[0.3em] text-xs py-3.5 rounded-xl ring-1 ring-emerald-300 shadow-glow-emerald active:scale-[0.99] transition-transform"
+        className="w-full bg-brand-700 disabled:bg-slate-300 text-white font-bold tracking-wider text-sm py-3.5 rounded-xl hover:bg-brand-800 active:bg-brand-900 transition-colors"
       >
-        {busy ? "SIGNING IN…" : "LOG IN"}
+        {busy ? "SIGNING IN…" : "LOGIN"}
       </button>
+
+      <div className="text-center text-[12px] text-slate-500 pt-2">
+        Don't have an account?{" "}
+        <button
+          type="button"
+          onClick={onSwitchMode}
+          className="text-brand-700 font-bold hover:text-brand-800"
+        >
+          Register
+        </button>
+      </div>
+
+      {accounts.length > 0 && (
+        <SavedAccounts accounts={accounts} onAuthed={onAuthed} />
+      )}
     </form>
   );
 }
 
 function SavedAccounts({ accounts, onAuthed }) {
   return (
-    <div className="mt-6">
-      <div className="text-[10px] tracking-[0.3em] text-zinc-500 mb-2">
+    <div className="mt-6 pt-4 border-t border-slate-100">
+      <div className="text-[10px] tracking-[0.3em] text-slate-500 font-bold mb-2">
         SAVED ACCOUNTS
       </div>
       <div className="space-y-1.5">
         {accounts.map((a) => (
           <button
             key={a.id}
+            type="button"
             onClick={() => {
-              // Quick-switch into this account (still locked — they need to type pw on next form)
               saveSession(a.id);
               onAuthed(a);
             }}
-            className="w-full flex items-center gap-3 bg-zinc-900/60 hover:bg-zinc-900 ring-1 ring-zinc-800 rounded-xl px-3 py-2.5 text-left"
+            className="w-full flex items-center gap-3 bg-slate-50 hover:bg-slate-100 ring-1 ring-slate-200 rounded-xl px-3 py-2 text-left"
           >
-            <Avatar name={a.fullName} />
+            <Avatar name={a.fullName} size={32} />
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-semibold truncate">{a.fullName}</div>
-              <div className="text-[11px] text-zinc-500 truncate">
+              <div className="text-sm font-semibold text-slate-900 truncate">
+                {a.fullName}
+              </div>
+              <div className="text-[11px] text-slate-500 truncate">
                 {a.phone} · {a.region}
               </div>
             </div>
-            <ChevronRight size={14} className="text-zinc-500" />
+            <ChevronRight size={14} className="text-slate-400" />
           </button>
         ))}
       </div>
-      <p className="mt-2 text-[10px] text-zinc-600">
-        Quick-switch keeps you logged into the most recent account on this
-        device.
+      <p className="mt-2 text-[10px] text-slate-400 text-center">
+        Quick-switch keeps you signed in on this device.
       </p>
     </div>
   );
@@ -258,7 +252,7 @@ export function Avatar({ name, size = 36 }) {
     .toUpperCase();
   return (
     <div
-      className="rounded-full bg-emerald-500/15 ring-1 ring-emerald-400/40 text-emerald-400 font-bold flex items-center justify-center"
+      className="rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center shrink-0"
       style={{ width: size, height: size, fontSize: size * 0.4 }}
     >
       {initials || "?"}
@@ -266,15 +260,15 @@ export function Avatar({ name, size = 36 }) {
   );
 }
 
-// ------------------------------ SIGNUP ------------------------------
+// ---------------- SIGNUP ----------------
 
-function SignupForm({ onAuthed }) {
+function SignupForm({ onAuthed, onSwitchMode }) {
   const [form, setForm] = useState({
     fullName: "",
     phone: "",
     email: "",
     dob: "",
-    region: "Uganda",
+    region: "Zimbabwe",
     password: "",
   });
   const [errors, setErrors] = useState({});
@@ -283,7 +277,6 @@ function SignupForm({ onAuthed }) {
   const [submitError, setSubmitError] = useState(null);
 
   const update = (patch) => setForm((f) => ({ ...f, ...patch }));
-
   const strength = passwordStrength(form.password);
 
   const validate = () => {
@@ -315,7 +308,7 @@ function SignupForm({ onAuthed }) {
   };
 
   return (
-    <form onSubmit={submit} className="space-y-3">
+    <form onSubmit={submit} className="mt-6 space-y-3">
       <Field icon={User} error={errors.fullName}>
         <input
           value={form.fullName}
@@ -330,7 +323,7 @@ function SignupForm({ onAuthed }) {
           type="tel"
           value={form.phone}
           onChange={(e) => update({ phone: e.target.value })}
-          placeholder="Phone number (e.g. 0771938039)"
+          placeholder="Phone (e.g. 0771938039)"
           className={inputCls}
         />
       </Field>
@@ -347,15 +340,14 @@ function SignupForm({ onAuthed }) {
           <button
             type="button"
             onClick={() => update({ email: suggestEmail(form.fullName) })}
-            className="text-[10px] font-bold tracking-widest text-emerald-400 hover:text-emerald-300 flex items-center gap-1 pr-1"
+            className="text-[10px] font-bold tracking-wider text-brand-700 hover:text-brand-800 flex items-center gap-1 pr-1"
             title="No email? Generate a demo one"
           >
             <Sparkles size={12} /> CREATE
           </button>
         </Field>
-        <p className="text-[10px] text-zinc-600 mt-1 ml-1">
-          No email? Tap CREATE — we'll suggest a demo address (
-          <code>@tyrone-detector.app</code>). Not a real mailbox.
+        <p className="text-[10px] text-slate-500 mt-1 ml-1">
+          No email? Tap <b>CREATE</b> for a demo address.
         </p>
       </div>
 
@@ -364,7 +356,7 @@ function SignupForm({ onAuthed }) {
           type="date"
           value={form.dob}
           onChange={(e) => update({ dob: e.target.value })}
-          className={inputCls + " [color-scheme:dark]"}
+          className={inputCls}
         />
       </Field>
 
@@ -375,7 +367,7 @@ function SignupForm({ onAuthed }) {
           className={inputCls + " appearance-none"}
         >
           {REGIONS.map((r) => (
-            <option key={r} value={r} className="bg-zinc-900">
+            <option key={r} value={r}>
               {r}
             </option>
           ))}
@@ -394,7 +386,7 @@ function SignupForm({ onAuthed }) {
           <button
             type="button"
             onClick={() => setShowPw((s) => !s)}
-            className="text-zinc-500 hover:text-zinc-300 pr-1"
+            className="text-slate-400 hover:text-slate-600 pr-1"
           >
             {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
           </button>
@@ -405,19 +397,19 @@ function SignupForm({ onAuthed }) {
               key={i}
               className={
                 "h-1 flex-1 rounded-full " +
-                (i <= strength ? STRENGTH_COLORS[strength] : "bg-zinc-800")
+                (i <= strength ? STRENGTH_COLORS[strength] : "bg-slate-200")
               }
             />
           ))}
         </div>
-        <div className="flex justify-between text-[10px] mt-1 text-zinc-500">
+        <div className="flex justify-between text-[10px] mt-1 text-slate-500">
           <span>{strengthLabel(strength)}</span>
-          <span>Must include A-Z, a-z, 0-9, symbol</span>
+          <span>A-Z · a-z · 0-9 · symbol</span>
         </div>
       </div>
 
       {submitError && (
-        <div className="text-[11px] text-red-400 bg-red-500/10 ring-1 ring-red-500/30 rounded-lg px-3 py-2">
+        <div className="text-[11px] text-red-600 bg-red-50 ring-1 ring-red-200 rounded-lg px-3 py-2">
           {submitError}
         </div>
       )}
@@ -425,10 +417,21 @@ function SignupForm({ onAuthed }) {
       <button
         type="submit"
         disabled={busy}
-        className="w-full bg-emerald-500 disabled:bg-zinc-700 text-black font-bold tracking-[0.3em] text-xs py-3.5 rounded-xl ring-1 ring-emerald-300 shadow-glow-emerald active:scale-[0.99] transition-transform flex items-center justify-center gap-2"
+        className="w-full bg-brand-700 disabled:bg-slate-300 text-white font-bold tracking-wider text-sm py-3.5 rounded-xl hover:bg-brand-800 active:bg-brand-900 transition-colors flex items-center justify-center gap-2"
       >
         <Plus size={14} /> {busy ? "CREATING…" : "CREATE ACCOUNT"}
       </button>
+
+      <div className="text-center text-[12px] text-slate-500 pt-2">
+        Already have an account?{" "}
+        <button
+          type="button"
+          onClick={onSwitchMode}
+          className="text-brand-700 font-bold hover:text-brand-800"
+        >
+          Sign in
+        </button>
+      </div>
     </form>
   );
 }

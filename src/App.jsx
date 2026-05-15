@@ -1,17 +1,32 @@
 import { useEffect, useRef, useState } from "react";
 import PhoneFrame from "./components/PhoneFrame";
-import Header from "./components/Header";
+import AppHeader from "./components/ui/AppHeader";
 import BottomNav from "./components/BottomNav";
 import SensorPairScreen from "./components/SensorPairScreen";
 import AlarmOverlay from "./components/AlarmOverlay";
 import SmsEscalation from "./components/SmsEscalation";
 import AuthScreen from "./components/AuthScreen";
-import DetectorScreen from "./components/screens/DetectorScreen";
-import MonitorScreen from "./components/screens/MonitorScreen";
-import GuideScreen from "./components/screens/GuideScreen";
-import LogScreen from "./components/screens/LogScreen";
-import SettingsScreen from "./components/screens/SettingsScreen";
-import { nextLiveReading, statusForReading, STATUS } from "./lib/simulator";
+
+import DashboardScreen from "./components/screens/DashboardScreen";
+import AlertsScreen from "./components/screens/AlertsScreen";
+import HistoryScreen from "./components/screens/HistoryScreen";
+import ProfileScreen from "./components/screens/ProfileScreen";
+import ChatbotScreen from "./components/screens/ChatbotScreen";
+import PersonalInfoScreen from "./components/screens/PersonalInfoScreen";
+import NotificationPrefsScreen from "./components/screens/NotificationPrefsScreen";
+import EmergencyContactsScreen from "./components/screens/EmergencyContactsScreen";
+import SecurityScreen from "./components/screens/SecurityScreen";
+import SystemSettingsScreen from "./components/screens/SystemSettingsScreen";
+import AboutScreen from "./components/screens/AboutScreen";
+
+import {
+  STATUS,
+  nextLiveReading,
+  nextTemperature,
+  randomGas,
+  randomScanPpm,
+  statusForReading,
+} from "./lib/simulator";
 import { startAlarm, stopAlarm } from "./lib/audio";
 import {
   DEFAULT_ACCOUNT_SETTINGS,
@@ -21,8 +36,50 @@ import {
   updateAccount,
 } from "./lib/auth";
 
-const HISTORY_LEN = 60;
 const ALARM_LOG_COOLDOWN_MS = 8000;
+
+// Maps each screen to which bottom-tab should appear active when on it.
+const SCREEN_TO_TAB = {
+  home: "home",
+  alerts: "alerts",
+  history: "history",
+  profile: "profile",
+  chatbot: "home",
+  // Profile sub-screens
+  "personal-info": "profile",
+  "notification-prefs": "profile",
+  "emergency-contacts": "profile",
+  security: "profile",
+  "system-settings": "profile",
+  about: "profile",
+};
+
+// Where "back" navigates to from each sub-screen.
+const BACK_TARGET = {
+  alerts: "home",
+  history: "home",
+  profile: "home",
+  chatbot: "home",
+  "personal-info": "profile",
+  "notification-prefs": "profile",
+  "emergency-contacts": "profile",
+  security: "profile",
+  "system-settings": "profile",
+  about: "profile",
+};
+
+const TITLE_FOR = {
+  alerts: "Notifications",
+  history: "History",
+  profile: "Profile",
+  chatbot: "Chatbot",
+  "personal-info": "Personal Information",
+  "notification-prefs": "Notification Preferences",
+  "emergency-contacts": "Emergency Contacts",
+  security: "Security",
+  "system-settings": "System Settings",
+  about: "About",
+};
 
 export default function App() {
   // ----- auth -----
@@ -30,39 +87,39 @@ export default function App() {
     const sess = loadSession();
     return sess ? getAccountById(sess.accountId) : null;
   });
-  const [showAuth, setShowAuth] = useState(false); // for switching accounts while logged in
+  const [showAuth, setShowAuth] = useState(false);
 
-  // ----- per-account state (settings, alertLog) persists; volatile state resets per session -----
+  // ----- per-account state (persisted) -----
   const [settings, setSettings] = useState(
     () => user?.settings || { ...DEFAULT_ACCOUNT_SETTINGS }
   );
   const [alertLog, setAlertLog] = useState(() => user?.alertLog || []);
 
-  // ----- volatile UI / runtime state -----
-  const [activeTab, setActiveTab] = useState("detector");
+  // ----- volatile state -----
+  const [screen, setScreen] = useState("home");
   const [sensorPairOpen, setSensorPairOpen] = useState(false);
   const [connectedSensor, setConnectedSensor] = useState(null);
 
-  const [lastScan, setLastScan] = useState(null);
-  const [monitoringOn, setMonitoringOn] = useState(false);
   const [liveReading, setLiveReading] = useState(0);
-  const [history, setHistory] = useState([]);
+  const [temperature, setTemperature] = useState(27);
+  const [lastUpdated, setLastUpdated] = useState(Date.now());
+  const [lastGas, setLastGas] = useState(randomGas());
+
   const [alarmActive, setAlarmActive] = useState(false);
   const [escalationActive, setEscalationActive] = useState(false);
   const lastAlarmLogRef = useRef(0);
 
-  // Reset volatile state when user changes
+  // Reset on user switch
   useEffect(() => {
     setSettings(user?.settings || { ...DEFAULT_ACCOUNT_SETTINGS });
     setAlertLog(user?.alertLog || []);
-    setLastScan(null);
-    setMonitoringOn(false);
     setLiveReading(0);
-    setHistory([]);
+    setTemperature(27);
+    setLastUpdated(Date.now());
     setAlarmActive(false);
     setEscalationActive(false);
     setConnectedSensor(null);
-    setActiveTab("detector");
+    setScreen("home");
   }, [user?.id]);
 
   // Persist settings + alertLog into the user's account whenever they change
@@ -71,31 +128,30 @@ export default function App() {
     updateAccount(user.id, { settings, alertLog });
   }, [settings, alertLog, user?.id]);
 
-  // Live monitoring loop
+  // Always-on live monitoring (this design has no toggle — the app shows
+  // "System is monitoring" on the dashboard at all times when logged in).
   useEffect(() => {
-    if (!monitoringOn) return;
-    setHistory([liveReading]);
+    if (!user) return;
     const id = setInterval(() => {
       setLiveReading((prev) => {
         const next = nextLiveReading(prev);
-        setHistory((h) => {
-          const out = [...h, next];
-          if (out.length > HISTORY_LEN) out.shift();
-          return out;
-        });
+        setLastUpdated(Date.now());
         const status = statusForReading(next, settings.threshold);
         if (status === STATUS.DANGER) {
           setAlarmActive(true);
           const now = Date.now();
           if (now - lastAlarmLogRef.current > ALARM_LOG_COOLDOWN_MS) {
             lastAlarmLogRef.current = now;
+            const gas = lastGas;
             setAlertLog((log) => [
               ...log,
               {
                 id: now,
                 datetime: now,
-                gas: lastScan?.gas || "Unknown",
+                gas,
                 peak: next,
+                status: STATUS.DANGER,
+                message: "High gas level detected!",
                 location: "Kitchen — Home",
                 source: "Live monitoring",
               },
@@ -106,18 +162,24 @@ export default function App() {
         }
         return next;
       });
+      setTemperature((t) => nextTemperature(t));
     }, 1000);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [monitoringOn, settings.threshold, settings.vibrationOn]);
+  }, [user?.id, settings.threshold, settings.vibrationOn]);
 
-  // Drive alarm audio
+  // Periodically pick a fresh "last detected gas" candidate so the log entries
+  // aren't all the same gas. Cheap — once a minute.
   useEffect(() => {
-    if (alarmActive && settings.soundOn) {
-      startAlarm();
-    } else {
-      stopAlarm();
-    }
+    if (!user) return;
+    const id = setInterval(() => setLastGas(randomGas()), 60000);
+    return () => clearInterval(id);
+  }, [user?.id]);
+
+  // Audio
+  useEffect(() => {
+    if (alarmActive && settings.soundOn) startAlarm();
+    else stopAlarm();
     return () => stopAlarm();
   }, [alarmActive, settings.soundOn]);
 
@@ -128,7 +190,7 @@ export default function App() {
     if (status === STATUS.SAFE) setAlarmActive(false);
   }, [liveReading, settings.threshold, alarmActive]);
 
-  // Trigger the SMS-then-call escalation when alarm fires WITH a connected sensor.
+  // SMS escalation only triggers when a sensor is paired
   useEffect(() => {
     if (alarmActive && connectedSensor && !escalationActive) {
       setEscalationActive(true);
@@ -138,18 +200,13 @@ export default function App() {
     }
   }, [alarmActive, connectedSensor, escalationActive]);
 
-  const appendAlertLog = (entry) => setAlertLog((log) => [...log, entry]);
+  // ----- handlers -----
   const clearAlertLog = () => setAlertLog([]);
+  const activeTab = SCREEN_TO_TAB[screen] || "home";
 
-  const toggleMonitoring = () => {
-    setMonitoringOn((on) => {
-      if (on) {
-        setAlarmActive(false);
-        setEscalationActive(false);
-        stopAlarm();
-      }
-      return !on;
-    });
+  const handleQuickAction = (action) => {
+    if (action === "history") setScreen("history");
+    else if (action === "tips" || action === "chatbot") setScreen("chatbot");
   };
 
   const handleLogout = () => {
@@ -158,10 +215,13 @@ export default function App() {
     setShowAuth(false);
   };
 
-  const handleSwitchAccount = () => {
-    saveSession(null);
-    setShowAuth(true);
+  const goBack = () => {
+    const target = BACK_TARGET[screen];
+    if (target) setScreen(target);
   };
+
+  const firstName = user?.fullName?.split(" ")[0] || "User";
+  const unseenAlerts = alertLog.length;
 
   // ----- auth gate -----
   if (!user || showAuth) {
@@ -175,62 +235,92 @@ export default function App() {
     );
   }
 
+  // ----- header props per screen -----
+  const headerProps =
+    screen === "home"
+      ? {
+          variant: "dashboard",
+          greeting: `Hello, ${firstName}`,
+          subtitle: "System is monitoring",
+          onMenu: () => setScreen("profile"),
+          onBell: () => setScreen("alerts"),
+          bellBadge: unseenAlerts,
+        }
+      : {
+          variant: "title",
+          title: TITLE_FOR[screen] || "",
+          onBack: goBack,
+        };
+
   return (
     <PhoneFrame darkMode={settings.darkMode}>
-      <Header
-        darkMode={settings.darkMode}
-        connectedSensor={connectedSensor}
-        onOpenSensorPair={() => setSensorPairOpen(true)}
-        user={user}
-        onOpenSettings={() => setActiveTab("settings")}
-      />
+      <AppHeader {...headerProps} />
 
-      <main className="flex-1 flex flex-col overflow-hidden relative">
-        {activeTab === "detector" && (
-          <DetectorScreen
-            lastScan={lastScan}
-            setLastScan={setLastScan}
-            threshold={settings.threshold}
-            units={settings.units}
-            vibrationOn={settings.vibrationOn}
-            appendAlertLog={appendAlertLog}
-            connectedSensor={connectedSensor}
-          />
-        )}
-        {activeTab === "monitor" && (
-          <MonitorScreen
-            monitoringOn={monitoringOn}
-            toggleMonitoring={toggleMonitoring}
+      <main className="flex-1 flex flex-col overflow-hidden relative bg-slate-50">
+        {screen === "home" && (
+          <DashboardScreen
             liveReading={liveReading}
-            history={history}
             threshold={settings.threshold}
             units={settings.units}
+            temperature={temperature}
+            lastUpdated={lastUpdated}
             connectedSensor={connectedSensor}
+            monitoringOn={true}
+            onQuickAction={handleQuickAction}
           />
         )}
-        {activeTab === "guide" && <GuideScreen />}
-        {activeTab === "log" && (
-          <LogScreen
+        {screen === "alerts" && (
+          <AlertsScreen alertLog={alertLog} clearAlertLog={clearAlertLog} />
+        )}
+        {screen === "history" && (
+          <HistoryScreen
             alertLog={alertLog}
             threshold={settings.threshold}
             clearAlertLog={clearAlertLog}
           />
         )}
-        {activeTab === "settings" && (
-          <SettingsScreen
-            settings={settings}
-            setSettings={setSettings}
+        {screen === "profile" && (
+          <ProfileScreen
             user={user}
+            onNavigate={(sub) => setScreen(sub)}
             onLogout={handleLogout}
-            onSwitchAccount={handleSwitchAccount}
           />
         )}
+        {screen === "chatbot" && <ChatbotScreen />}
+
+        {screen === "personal-info" && (
+          <PersonalInfoScreen user={user} onUpdate={setUser} />
+        )}
+        {screen === "notification-prefs" && (
+          <NotificationPrefsScreen
+            settings={settings}
+            setSettings={setSettings}
+          />
+        )}
+        {screen === "emergency-contacts" && (
+          <EmergencyContactsScreen
+            settings={settings}
+            setSettings={setSettings}
+          />
+        )}
+        {screen === "security" && (
+          <SecurityScreen user={user} onUpdate={setUser} />
+        )}
+        {screen === "system-settings" && (
+          <SystemSettingsScreen
+            settings={settings}
+            setSettings={setSettings}
+            connectedSensor={connectedSensor}
+            onOpenSensorPair={() => setSensorPairOpen(true)}
+          />
+        )}
+        {screen === "about" && <AboutScreen />}
 
         {alarmActive && (
           <AlarmOverlay
             ppm={liveReading}
             units={settings.units}
-            gas={lastScan?.gas}
+            gas={lastGas}
             emergencyContact={settings.emergencyContact}
             onSilence={() => {
               setAlarmActive(false);
@@ -239,11 +329,10 @@ export default function App() {
           />
         )}
 
-        {/* SMS-then-call escalation popup (only when a sensor is paired) */}
         <SmsEscalation
           active={escalationActive}
           user={user}
-          gas={lastScan?.gas}
+          gas={lastGas}
           ppm={liveReading}
           onAcknowledge={() => setEscalationActive(false)}
         />
@@ -251,8 +340,8 @@ export default function App() {
 
       <BottomNav
         activeTab={activeTab}
-        onChange={setActiveTab}
-        darkMode={settings.darkMode}
+        onChange={(tab) => setScreen(tab)}
+        alertBadge={unseenAlerts}
       />
 
       <SensorPairScreen
@@ -262,6 +351,18 @@ export default function App() {
         onConnect={(device) => {
           setConnectedSensor(device);
           setSensorPairOpen(false);
+          // Log an INFO event so it shows in Alerts
+          const now = Date.now();
+          setAlertLog((log) => [
+            ...log,
+            {
+              id: now,
+              datetime: now,
+              status: STATUS.INFO,
+              message: `${device.name} connected`,
+              source: "System",
+            },
+          ]);
         }}
         darkMode={settings.darkMode}
       />
