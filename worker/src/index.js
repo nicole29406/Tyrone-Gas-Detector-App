@@ -112,11 +112,11 @@ export default {
           ok: true,
           configured: {
             sms: Boolean(
-              env.TWILIO_ACCOUNT_SID &&
-                env.TWILIO_AUTH_TOKEN &&
-                env.TWILIO_FROM_NUMBER
+              (env.TWILIO_ACCOUNT_SID || "").trim() &&
+                (env.TWILIO_AUTH_TOKEN || "").trim() &&
+                (env.TWILIO_FROM_NUMBER || "").trim()
             ),
-            chat: Boolean(env.ANTHROPIC_API_KEY),
+            chat: Boolean((env.ANTHROPIC_API_KEY || "").trim()),
           },
         },
         {},
@@ -167,12 +167,13 @@ export default {
       );
     }
 
-    // Check provider config
-    if (
-      !env.TWILIO_ACCOUNT_SID ||
-      !env.TWILIO_AUTH_TOKEN ||
-      !env.TWILIO_FROM_NUMBER
-    ) {
+    // Trim each secret defensively (PowerShell's pipe to wrangler can leave
+    // a trailing CR/LF on Windows, which corrupts the header values).
+    const twAccountSid = (env.TWILIO_ACCOUNT_SID || "").trim();
+    const twAuthToken = (env.TWILIO_AUTH_TOKEN || "").trim();
+    const twFromNumber = (env.TWILIO_FROM_NUMBER || "").trim();
+
+    if (!twAccountSid || !twAuthToken || !twFromNumber) {
       return json(
         {
           error: "SMS provider not configured",
@@ -188,11 +189,11 @@ export default {
     }
 
     // Call Twilio
-    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${env.TWILIO_ACCOUNT_SID}/Messages.json`;
-    const auth = btoa(`${env.TWILIO_ACCOUNT_SID}:${env.TWILIO_AUTH_TOKEN}`);
+    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twAccountSid}/Messages.json`;
+    const auth = btoa(`${twAccountSid}:${twAuthToken}`);
     const formData = new URLSearchParams();
     formData.set("To", phone);
-    formData.set("From", env.TWILIO_FROM_NUMBER);
+    formData.set("From", twFromNumber);
     formData.set("Body", message);
 
     let twResponse, twBody;
@@ -254,7 +255,11 @@ export default {
 // Falls back to 503 if the key isn't configured — the frontend then uses its
 // built-in rule-based bot.
 async function handleChat(request, env, origin) {
-  if (!env.ANTHROPIC_API_KEY) {
+  // Trim defensively — PowerShell's `| wrangler secret put` can leave a
+  // trailing CR/LF on Windows. Without this the API key gets rejected as
+  // invalid even though the underlying value is correct.
+  const apiKey = (env.ANTHROPIC_API_KEY || "").trim();
+  if (!apiKey) {
     return json(
       {
         error: "Chatbot not configured",
@@ -311,7 +316,7 @@ async function handleChat(request, env, origin) {
     res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
-        "x-api-key": env.ANTHROPIC_API_KEY,
+        "x-api-key": apiKey,
         "anthropic-version": "2023-06-01",
         "content-type": "application/json",
       },
