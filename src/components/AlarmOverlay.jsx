@@ -39,7 +39,7 @@ export default function AlarmOverlay({
         {emergencyContact && (
           <a
             href={`tel:${emergencyContact}`}
-            className="flex items-center justify-center gap-2 w-full bg-white text-red-700 font-bold py-4 rounded-2xl text-sm uppercase tracking-widest"
+            className="flex items-center justify-center gap-2 w-full bg-slate-900 text-red-300 font-bold py-4 rounded-2xl text-sm uppercase tracking-widest"
           >
             <Phone size={16} /> Call {emergencyContact}
           </a>

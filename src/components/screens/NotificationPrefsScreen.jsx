@@ -12,8 +12,8 @@ export default function NotificationPrefsScreen({ settings, setSettings }) {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-3 pb-5 bg-slate-50">
-      <Card padded={false} className="divide-y divide-slate-100 overflow-hidden">
+    <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-3 pb-5 bg-slate-950">
+      <Card padded={false} className="divide-y divide-slate-800 overflow-hidden">
         <MenuRow
           icon={Volume2}
           label="Alarm sound"
@@ -42,16 +42,16 @@ export default function NotificationPrefsScreen({ settings, setSettings }) {
 
       <Card className="mt-4">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-9 h-9 rounded-xl bg-brand-50 flex items-center justify-center">
-            <GaugeIcon size={17} className="text-brand-700" />
+          <div className="w-9 h-9 rounded-xl bg-brand-500/15 flex items-center justify-center">
+            <GaugeIcon size={17} className="text-brand-300" />
           </div>
           <div className="flex-1">
-            <div className="text-sm font-semibold text-slate-900">
+            <div className="text-sm font-semibold text-slate-100">
               Sensitivity threshold
             </div>
             <div className="text-[11px] text-slate-500">
               Alarm triggers at or above{" "}
-              <span className="font-bold text-brand-700">
+              <span className="font-bold text-brand-300">
                 {settings.threshold} PPM
               </span>
             </div>
@@ -75,7 +75,7 @@ export default function NotificationPrefsScreen({ settings, setSettings }) {
 
       <button
         onClick={testAlarm}
-        className="mt-4 w-full bg-white border border-slate-200 rounded-2xl py-3.5 font-semibold flex items-center justify-center gap-2 text-slate-700 hover:bg-slate-50 transition-colors"
+        className="mt-4 w-full bg-slate-900 border border-slate-700 rounded-2xl py-3.5 font-semibold flex items-center justify-center gap-2 text-slate-200 hover:bg-slate-800/60 transition-colors"
       >
         <Bell size={16} /> Test alarm sound
       </button>

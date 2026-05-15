@@ -36,7 +36,7 @@
   <text x="256" y="450" text-anchor="middle"
         font-family="system-ui, -apple-system, 'Segoe UI', Inter, sans-serif"
         font-weight="800"
-        font-size="44"
-        letter-spacing="6"
-        fill="#10b981">TYRONE</text>
+        font-size="64"
+        letter-spacing="8"
+        fill="#10b981">JKC</text>
 </svg>

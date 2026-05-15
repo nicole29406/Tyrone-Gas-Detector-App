@@ -11,7 +11,7 @@ import {
 } from "../../lib/auth";
 
 const STRENGTH_COLORS = [
-  "bg-slate-200",
+  "bg-slate-700",
   "bg-red-500",
   "bg-orange-400",
   "bg-amber-400",
@@ -20,7 +20,7 @@ const STRENGTH_COLORS = [
 ];
 
 const inputCls =
-  "w-full bg-slate-50 ring-1 ring-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-brand-500";
+  "w-full bg-slate-950 ring-1 ring-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-brand-400";
 
 export default function SecurityScreen({ user, onUpdate }) {
   const [current, setCurrent] = useState("");
@@ -75,14 +75,14 @@ export default function SecurityScreen({ user, onUpdate }) {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-3 pb-5 bg-slate-50">
+    <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-3 pb-5 bg-slate-950">
       <Card>
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center">
-            <ShieldCheck size={18} className="text-brand-700" />
+          <div className="w-10 h-10 rounded-xl bg-brand-500/15 flex items-center justify-center">
+            <ShieldCheck size={18} className="text-brand-300" />
           </div>
           <div>
-            <div className="text-sm font-semibold text-slate-900">
+            <div className="text-sm font-semibold text-slate-100">
               Change password
             </div>
             <div className="text-[11px] text-slate-500">
@@ -102,7 +102,7 @@ export default function SecurityScreen({ user, onUpdate }) {
             <button
               type="button"
               onClick={() => setShow((s) => !s)}
-              className="absolute top-2.5 right-2 text-slate-400 hover:text-slate-600"
+              className="absolute top-2.5 right-2 text-slate-500 hover:text-slate-300"
               aria-label="Toggle visibility"
             >
               {show ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -122,7 +122,7 @@ export default function SecurityScreen({ user, onUpdate }) {
                   key={i}
                   className={
                     "h-1 flex-1 rounded-full " +
-                    (i <= strength ? STRENGTH_COLORS[strength] : "bg-slate-200")
+                    (i <= strength ? STRENGTH_COLORS[strength] : "bg-slate-700")
                   }
                 />
               ))}
@@ -137,8 +137,8 @@ export default function SecurityScreen({ user, onUpdate }) {
               className={
                 "text-[11px] rounded-lg px-3 py-2 " +
                 (status.type === "ok"
-                  ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
-                  : "bg-red-50 text-red-700 ring-1 ring-red-200")
+                  ? "bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/40"
+                  : "bg-red-500/15 text-red-300 ring-1 ring-red-500/40")
               }
             >
               {status.message}
@@ -148,7 +148,7 @@ export default function SecurityScreen({ user, onUpdate }) {
           <button
             type="submit"
             disabled={busy}
-            className="w-full bg-brand-700 text-white rounded-2xl py-3 font-bold tracking-wide flex items-center justify-center gap-2 hover:bg-brand-800 disabled:bg-slate-300 transition-colors"
+            className="w-full bg-brand-700 text-white rounded-2xl py-3 font-bold tracking-wide flex items-center justify-center gap-2 hover:bg-brand-800 disabled:bg-slate-700 disabled:text-slate-500 transition-colors"
           >
             <Lock size={14} /> {busy ? "Updating…" : "Update password"}
           </button>
@@ -157,7 +157,7 @@ export default function SecurityScreen({ user, onUpdate }) {
 
       <SectionTitle>Session</SectionTitle>
       <Card>
-        <div className="text-[12px] text-slate-700">
+        <div className="text-[12px] text-slate-200">
           You are signed in on this device. Logging out clears the saved session
           and returns you to the login screen.
         </div>

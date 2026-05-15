@@ -297,10 +297,10 @@ export default function App() {
         };
 
   return (
-    <PhoneFrame darkMode={settings.darkMode}>
+    <PhoneFrame>
       <AppHeader {...headerProps} />
 
-      <main className="flex-1 flex flex-col overflow-hidden relative bg-slate-50">
+      <main className="flex-1 flex flex-col overflow-hidden relative bg-slate-950">
         {screen === "home" && (
           <DashboardScreen
             liveReading={liveReading}
@@ -395,7 +395,6 @@ export default function App() {
         onConnect={(device) => {
           setConnectedSensor(device);
           setSensorPairOpen(false);
-          // Log an INFO event so it shows in Alerts
           const now = Date.now();
           setAlertLog((log) => [
             ...log,
@@ -408,7 +407,6 @@ export default function App() {
             },
           ]);
         }}
-        darkMode={settings.darkMode}
       />
     </PhoneFrame>
   );

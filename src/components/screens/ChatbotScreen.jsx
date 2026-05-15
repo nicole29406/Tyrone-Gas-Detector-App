@@ -92,15 +92,15 @@ export default function ChatbotScreen() {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 overflow-hidden">
+    <div className="flex-1 flex flex-col bg-slate-950 overflow-hidden">
       {/* Provenance badge */}
       <div className="px-4 pt-2 pb-1 flex items-center justify-center">
         <div
           className={
             "inline-flex items-center gap-1 text-[10px] font-semibold tracking-wide px-2.5 py-1 rounded-full " +
             (usedAI
-              ? "bg-brand-50 text-brand-700 ring-1 ring-brand-200"
-              : "bg-slate-100 text-slate-500 ring-1 ring-slate-200")
+              ? "bg-brand-500/15 text-brand-300 ring-1 ring-brand-500/40"
+              : "bg-slate-800 text-slate-500 ring-1 ring-slate-700")
           }
         >
           <Sparkles size={10} />
@@ -126,7 +126,7 @@ export default function ChatbotScreen() {
             key={q.id}
             onClick={() => sendMessage(q.label)}
             disabled={typing}
-            className="shrink-0 text-[12px] bg-white ring-1 ring-slate-200 rounded-full px-3 py-1.5 text-slate-700 hover:bg-brand-50 hover:ring-brand-200 hover:text-brand-700 transition-colors disabled:opacity-50"
+            className="shrink-0 text-[12px] bg-slate-900 ring-1 ring-slate-700 rounded-full px-3 py-1.5 text-slate-200 hover:bg-brand-500/15 hover:ring-brand-500/40 hover:text-brand-300 transition-colors disabled:opacity-50"
           >
             {q.label}
           </button>
@@ -139,20 +139,22 @@ export default function ChatbotScreen() {
           e.preventDefault();
           sendMessage(draft);
         }}
-        className="px-3 pb-4 pt-2 bg-slate-50"
+        className="px-3 pb-4 pt-2 bg-slate-950"
       >
-        <div className="flex items-center gap-2 bg-white ring-1 ring-slate-200 rounded-full pl-4 pr-1 py-1">
+        <div className="flex items-center gap-2 bg-slate-900 ring-1 ring-slate-700 rounded-full pl-4 pr-1 py-1">
           <input
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Type your message…"
             disabled={typing}
-            className="flex-1 bg-transparent py-2 text-[14px] focus:outline-none placeholder:text-slate-400 disabled:opacity-50"
+            enterKeyHint="send"
+            autoComplete="off"
+            className="flex-1 bg-transparent py-2 text-[14px] text-slate-100 focus:outline-none placeholder:text-slate-500 disabled:opacity-50"
           />
           <button
             type="submit"
             disabled={!draft.trim() || typing}
-            className="w-9 h-9 rounded-full bg-brand-700 disabled:bg-slate-300 text-white flex items-center justify-center transition-colors"
+            className="w-9 h-9 rounded-full bg-brand-700 disabled:bg-slate-700 disabled:text-slate-500 text-white flex items-center justify-center transition-colors"
             aria-label="Send"
           >
             <Send size={15} />
@@ -171,12 +173,12 @@ function Message({ msg }) {
           <div className="bg-brand-700 text-white rounded-2xl rounded-br-md px-3.5 py-2 text-[13.5px] leading-snug whitespace-pre-wrap">
             {msg.content}
           </div>
-          <div className="text-[10px] text-slate-400 mt-1 text-right pr-1">
+          <div className="text-[10px] text-slate-500 mt-1 text-right pr-1">
             {fmtTime(msg.ts)}
           </div>
         </div>
-        <div className="w-7 h-7 rounded-full bg-brand-100 flex items-center justify-center shrink-0 mb-5">
-          <User size={14} className="text-brand-700" />
+        <div className="w-7 h-7 rounded-full bg-brand-500/25 flex items-center justify-center shrink-0 mb-5">
+          <User size={14} className="text-brand-300" />
         </div>
       </div>
     );
@@ -184,17 +186,17 @@ function Message({ msg }) {
   // Bot
   return (
     <div className="flex items-end gap-2 animate-slide-up">
-      <div className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center shrink-0 mb-5">
-        <Bot size={14} className="text-slate-700" />
+      <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center shrink-0 mb-5">
+        <Bot size={14} className="text-slate-200" />
       </div>
       <div className="max-w-[82%]">
-        <div className="bg-white ring-1 ring-slate-200 rounded-2xl rounded-bl-md px-3.5 py-2.5 text-[13.5px] leading-snug text-slate-800">
+        <div className="bg-slate-900 ring-1 ring-slate-700 rounded-2xl rounded-bl-md px-3.5 py-2.5 text-[13.5px] leading-snug text-slate-100">
           <BotContent content={msg.content} />
         </div>
-        <div className="text-[10px] text-slate-400 mt-1 pl-1 flex items-center gap-1">
+        <div className="text-[10px] text-slate-500 mt-1 pl-1 flex items-center gap-1">
           {fmtTime(msg.ts)}
           {msg.source === "claude" && (
-            <span className="text-brand-700 font-semibold">· Claude</span>
+            <span className="text-brand-300 font-semibold">· Claude</span>
           )}
         </div>
       </div>
@@ -216,7 +218,7 @@ function BotContent({ content }) {
           if (bullet) {
             return (
               <div key={i} className="flex gap-2">
-                <span className="text-brand-700 mt-0.5">•</span>
+                <span className="text-brand-300 mt-0.5">•</span>
                 <span className="whitespace-pre-wrap">
                   {line.replace(/^\s*[-•]\s+/, "")}
                 </span>
@@ -244,7 +246,7 @@ function BotContent({ content }) {
         <ul className="space-y-1 mt-1">
           {content.bullets.map((b, i) => (
             <li key={i} className="flex gap-2">
-              <span className="text-brand-700 mt-0.5">•</span>
+              <span className="text-brand-300 mt-0.5">•</span>
               <span>{b}</span>
             </li>
           ))}
@@ -260,10 +262,10 @@ function BotContent({ content }) {
 function TypingBubble() {
   return (
     <div className="flex items-end gap-2">
-      <div className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center shrink-0 mb-2">
-        <Bot size={14} className="text-slate-700" />
+      <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center shrink-0 mb-2">
+        <Bot size={14} className="text-slate-200" />
       </div>
-      <div className="bg-white ring-1 ring-slate-200 rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1">
+      <div className="bg-slate-900 ring-1 ring-slate-700 rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1">
         <Dot delay="0s" />
         <Dot delay="0.15s" />
         <Dot delay="0.3s" />

@@ -13,8 +13,8 @@ export default function SystemSettingsScreen({
   const SensorIcon = connectedSensor ? BluetoothConnected : Bluetooth;
 
   return (
-    <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-3 pb-5 bg-slate-50">
-      <Card padded={false} className="divide-y divide-slate-100 overflow-hidden">
+    <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-3 pb-5 bg-slate-950">
+      <Card padded={false} className="divide-y divide-slate-800 overflow-hidden">
         <MenuRow
           icon={SensorIcon}
           label="Sensor pairing"
@@ -28,8 +28,8 @@ export default function SystemSettingsScreen({
               className={
                 "text-[11px] font-bold tracking-wider px-2 py-0.5 rounded-full " +
                 (connectedSensor
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "bg-slate-100 text-slate-500")
+                  ? "bg-emerald-500/15 text-emerald-300"
+                  : "bg-slate-800 text-slate-500")
               }
             >
               {connectedSensor ? "LINKED" : "PAIR"}
@@ -44,7 +44,7 @@ export default function SystemSettingsScreen({
           hint="How the gas reading is displayed"
           showChevron={false}
           trailing={
-            <div className="flex bg-slate-100 rounded-lg p-0.5">
+            <div className="flex bg-slate-800 rounded-lg p-0.5">
               {["ppm", "lel"].map((u) => (
                 <button
                   key={u}

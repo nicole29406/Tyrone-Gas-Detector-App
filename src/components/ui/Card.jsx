@@ -1,12 +1,9 @@
-// Standard white rounded card with subtle shadow — the workhorse container for
-// every screen.
-
 export default function Card({ className = "", padded = true, children, ...rest }) {
   return (
     <div
       {...rest}
       className={
-        "bg-white rounded-2xl shadow-card border border-slate-100 " +
+        "bg-slate-900 rounded-2xl shadow-card border border-slate-800 " +
         (padded ? "p-4 " : "") +
         className
       }

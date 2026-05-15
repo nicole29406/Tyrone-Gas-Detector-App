@@ -4,7 +4,7 @@ import Card from "../ui/Card";
 import { REGIONS, updateAccount } from "../../lib/auth";
 
 const inputCls =
-  "w-full bg-white ring-1 ring-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-brand-500";
+  "w-full bg-slate-900 ring-1 ring-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-brand-400";
 
 function Field({ label, children }) {
   return (
@@ -40,7 +40,7 @@ export default function PersonalInfoScreen({ user, onUpdate }) {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-3 pb-5 bg-slate-50">
+    <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-3 pb-5 bg-slate-950">
       <Card className="space-y-3">
         <Field label="Full name">
           <input

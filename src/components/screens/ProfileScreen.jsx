@@ -21,7 +21,7 @@ function Avatar({ name, size = 64 }) {
     .toUpperCase();
   return (
     <div
-      className="rounded-full bg-brand-100 ring-4 ring-white text-brand-700 font-bold flex items-center justify-center shadow-card"
+      className="rounded-full bg-brand-500/25 ring-4 ring-white text-brand-300 font-bold flex items-center justify-center shadow-card"
       style={{ width: size, height: size, fontSize: size * 0.36 }}
     >
       {initials || <User size={size * 0.4} />}
@@ -31,12 +31,12 @@ function Avatar({ name, size = 64 }) {
 
 export default function ProfileScreen({ user, onNavigate, onLogout }) {
   return (
-    <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-3 pb-5 bg-slate-50">
+    <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-3 pb-5 bg-slate-950">
       {/* User card */}
       <Card className="flex items-center gap-4">
         <Avatar name={user?.fullName} />
         <div className="flex-1 min-w-0">
-          <div className="text-base font-bold text-slate-900 truncate">
+          <div className="text-base font-bold text-slate-100 truncate">
             {user?.fullName || "Guest user"}
           </div>
           <div className="text-[12px] text-slate-500 truncate flex items-center gap-1.5">
@@ -49,7 +49,7 @@ export default function ProfileScreen({ user, onNavigate, onLogout }) {
       </Card>
 
       {/* Menu */}
-      <Card padded={false} className="mt-4 divide-y divide-slate-100 overflow-hidden">
+      <Card padded={false} className="mt-4 divide-y divide-slate-800 overflow-hidden">
         <MenuRow
           icon={User}
           label="Personal Information"
@@ -80,7 +80,7 @@ export default function ProfileScreen({ user, onNavigate, onLogout }) {
 
       <button
         onClick={onLogout}
-        className="mt-4 w-full bg-white border border-red-100 rounded-2xl py-3.5 flex items-center justify-center gap-2 text-red-600 font-semibold text-[14px] hover:bg-red-50 active:bg-red-100 transition-colors"
+        className="mt-4 w-full bg-slate-900 border border-red-500/30 rounded-2xl py-3.5 flex items-center justify-center gap-2 text-red-400 font-semibold text-[14px] hover:bg-red-500/15 active:bg-red-100 transition-colors"
       >
         <LogOut size={16} /> Logout
       </button>

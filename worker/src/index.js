@@ -1,8 +1,8 @@
-// TYRONE DETECTOR — SMS proxy Worker
+// JKC GAS DETECTOR — SMS + chat proxy Worker
 // Receives signed requests from the frontend, validates them, and forwards to
-// Twilio's Programmable Messaging API. Twilio credentials are stored as
-// Cloudflare Workers secrets (`wrangler secret put TWILIO_ACCOUNT_SID`, etc.)
-// and never reach the browser.
+// Twilio's Programmable Messaging API and Anthropic's Messages API. All
+// credentials are stored as Cloudflare Workers secrets and never reach the
+// browser.
 
 const ALLOWED_ORIGINS = [
   "https://nicole29406.github.io",
@@ -17,7 +17,7 @@ const MAX_MESSAGE_LEN = 480; // 3 SMS segments
 const CLAUDE_MODEL = "claude-sonnet-4-5";
 const CHAT_MAX_TOKENS = 600;
 const CHAT_MAX_INPUT_CHARS = 4000; // bounds API cost per request
-const CHAT_SYSTEM_PROMPT = `You are GasBot — the safety assistant inside TYRONE DETECTOR, a gas leak detection mobile app.
+const CHAT_SYSTEM_PROMPT = `You are GasBot — the safety assistant inside JKC GAS DETECTOR, a gas leak detection mobile app.
 
 You help users with:
 - Recognising and responding to gas leaks
@@ -34,7 +34,9 @@ GUIDELINES:
 - Keep responses under 180 words when possible.
 - Never claim to physically intervene — you can only inform and guide.
 
-If a user reports an ACTIVE emergency, your first response must be the evacuation + emergency-call protocol.`;
+If a user reports an ACTIVE emergency, your first response must be the evacuation + emergency-call protocol.
+
+The app is branded "JKC GAS DETECTOR". Refer to it by that name if asked.`;
 
 // Country-dial-code map for normalising local-format numbers ("0771...") to
 // E.164 ("+256771..."). Keys must match the `region` strings stored in the

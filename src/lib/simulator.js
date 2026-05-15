@@ -26,61 +26,61 @@ export function statusForReading(ppm, threshold) {
   return STATUS.SAFE;
 }
 
-// Tailwind-friendly tokens for each status — used by cards, badges, banners.
+// Tailwind tokens for each status — designed for the dark theme.
 export function statusAccent(status) {
   switch (status) {
     case STATUS.DANGER:
       return {
-        text: "text-red-600",
-        bg: "bg-red-50",
-        border: "border-red-200",
-        ring: "ring-red-300",
-        chip: "bg-red-100 text-red-700",
-        stroke: "#dc2626",
+        text: "text-red-400",
+        bg: "bg-red-500/15",
+        border: "border-red-500/40",
+        ring: "ring-red-500/40",
+        chip: "bg-red-500/20 text-red-300",
+        stroke: "#f87171",
         label: "HIGH GAS ALERT",
         subtitle: "High gas level detected!",
       };
     case STATUS.WARNING:
       return {
-        text: "text-orange-600",
-        bg: "bg-orange-50",
-        border: "border-orange-200",
-        ring: "ring-orange-300",
-        chip: "bg-orange-100 text-orange-700",
-        stroke: "#ea580c",
+        text: "text-orange-400",
+        bg: "bg-orange-500/15",
+        border: "border-orange-500/40",
+        ring: "ring-orange-500/40",
+        chip: "bg-orange-500/20 text-orange-300",
+        stroke: "#fb923c",
         label: "WARNING",
         subtitle: "Gas level is above normal.",
       };
     case STATUS.CAUTION:
       return {
-        text: "text-amber-600",
-        bg: "bg-amber-50",
-        border: "border-amber-200",
-        ring: "ring-amber-300",
-        chip: "bg-amber-100 text-amber-700",
-        stroke: "#d97706",
+        text: "text-amber-400",
+        bg: "bg-amber-500/15",
+        border: "border-amber-500/40",
+        ring: "ring-amber-500/40",
+        chip: "bg-amber-500/20 text-amber-300",
+        stroke: "#fbbf24",
         label: "CAUTION",
         subtitle: "Gas level is rising.",
       };
     case STATUS.INFO:
       return {
-        text: "text-blue-600",
-        bg: "bg-blue-50",
-        border: "border-blue-200",
-        ring: "ring-blue-300",
-        chip: "bg-blue-100 text-blue-700",
-        stroke: "#2563eb",
+        text: "text-blue-400",
+        bg: "bg-blue-500/15",
+        border: "border-blue-500/40",
+        ring: "ring-blue-500/40",
+        chip: "bg-blue-500/20 text-blue-300",
+        stroke: "#60a5fa",
         label: "INFO",
         subtitle: "Informational",
       };
     default:
       return {
-        text: "text-emerald-600",
-        bg: "bg-emerald-50",
-        border: "border-emerald-200",
-        ring: "ring-emerald-300",
-        chip: "bg-emerald-100 text-emerald-700",
-        stroke: "#059669",
+        text: "text-emerald-400",
+        bg: "bg-emerald-500/15",
+        border: "border-emerald-500/40",
+        ring: "ring-emerald-500/40",
+        chip: "bg-emerald-500/20 text-emerald-300",
+        stroke: "#34d399",
         label: "SAFE",
         subtitle: "Air is safe",
       };

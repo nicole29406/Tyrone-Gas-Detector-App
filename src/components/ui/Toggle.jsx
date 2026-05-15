@@ -7,8 +7,8 @@ export default function Toggle({ checked, onChange, disabled }) {
         "relative w-11 h-6 rounded-full transition-colors ring-1 " +
         (disabled ? "opacity-50 " : "") +
         (checked
-          ? "bg-brand-700 ring-brand-700/30"
-          : "bg-slate-200 ring-slate-300")
+          ? "bg-brand-600 ring-brand-400/40"
+          : "bg-slate-700 ring-slate-600")
       }
     >
       <span

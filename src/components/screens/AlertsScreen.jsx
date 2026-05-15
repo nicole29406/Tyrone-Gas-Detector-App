@@ -32,7 +32,7 @@ export default function AlertsScreen({ alertLog, clearAlertLog }) {
   const items = [...alertLog].sort((a, b) => b.datetime - a.datetime);
 
   return (
-    <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-3 pb-5 bg-slate-50">
+    <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-3 pb-5 bg-slate-950">
       {items.length === 0 ? (
         <EmptyState />
       ) : (
@@ -46,7 +46,7 @@ export default function AlertsScreen({ alertLog, clearAlertLog }) {
       {items.length > 0 && (
         <button
           onClick={clearAlertLog}
-          className="mt-4 mx-auto flex items-center gap-1.5 text-[12px] font-semibold text-slate-500 hover:text-red-600 px-3 py-1.5"
+          className="mt-4 mx-auto flex items-center gap-1.5 text-[12px] font-semibold text-slate-500 hover:text-red-400 px-3 py-1.5"
         >
           <Trash2 size={12} /> Clear all alerts
         </button>
@@ -79,7 +79,7 @@ function AlertCard({ item }) {
               {fmtTime(item.datetime)}
             </div>
           </div>
-          <div className="text-[13px] text-slate-700 mt-0.5 leading-snug">
+          <div className="text-[13px] text-slate-200 mt-0.5 leading-snug">
             {item.message || accent.subtitle}
           </div>
           {(item.peak != null || item.gas) && (
@@ -102,10 +102,10 @@ function AlertCard({ item }) {
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center text-center mt-16">
-      <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mb-3">
-        <Info size={22} className="text-blue-600" />
+      <div className="w-14 h-14 rounded-2xl bg-blue-500/15 flex items-center justify-center mb-3">
+        <Info size={22} className="text-blue-400" />
       </div>
-      <div className="text-sm font-semibold text-slate-700">No alerts yet</div>
+      <div className="text-sm font-semibold text-slate-200">No alerts yet</div>
       <div className="text-[12px] text-slate-500 mt-1 max-w-[280px]">
         Alerts appear here automatically when gas readings cross the threshold or
         the system records an event.

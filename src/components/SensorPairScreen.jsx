@@ -8,7 +8,7 @@ import { Bluetooth, X, Wifi, CheckCircle2 } from "lucide-react";
 const fakeDevices = [
   { id: "mq2-a1b2", name: "MQ-2 Sensor #A1B2", rssi: -42 },
   { id: "esp32-gas-lab", name: "ESP32-Gas-Lab", rssi: -56 },
-  { id: "tyrone-probe-01", name: "TYRONE-Probe-01", rssi: -71 },
+  { id: "jkc-probe-01", name: "JKC-Probe-01", rssi: -71 },
 ];
 
 export default function SensorPairScreen({
@@ -34,21 +34,21 @@ export default function SensorPairScreen({
   if (!open) return null;
 
   return (
-    <div className="absolute inset-0 z-40 flex flex-col bg-slate-50">
-      <div className="px-4 pt-3 pb-3 flex items-center justify-between border-b border-slate-200 bg-white">
+    <div className="absolute inset-0 z-40 flex flex-col bg-slate-950">
+      <div className="px-4 pt-3 pb-3 flex items-center justify-between border-b border-slate-700 bg-slate-900">
         <div>
-          <div className="text-[10px] tracking-[0.3em] text-brand-700 font-bold">
+          <div className="text-[10px] tracking-[0.3em] text-brand-300 font-bold">
             PAIR
           </div>
-          <div className="text-base font-bold text-slate-900">
+          <div className="text-base font-bold text-slate-100">
             Sensor Connection
           </div>
         </div>
         <button
           onClick={onClose}
-          className="w-9 h-9 rounded-full bg-slate-100 ring-1 ring-slate-200 flex items-center justify-center"
+          className="w-9 h-9 rounded-full bg-slate-800 ring-1 ring-slate-700 flex items-center justify-center"
         >
-          <X size={16} className="text-slate-600" />
+          <X size={16} className="text-slate-300" />
         </button>
       </div>
 
@@ -64,11 +64,11 @@ export default function SensorPairScreen({
               className="absolute inset-6 rounded-full border border-brand-300/40 animate-ping-slow"
               style={{ animationDelay: "0.8s" }}
             />
-            <div className="relative w-16 h-16 rounded-full bg-brand-50 ring-2 ring-brand-300 flex items-center justify-center">
-              <Bluetooth size={26} className="text-brand-700" />
+            <div className="relative w-16 h-16 rounded-full bg-brand-500/15 ring-2 ring-brand-500/50 flex items-center justify-center">
+              <Bluetooth size={26} className="text-brand-300" />
             </div>
           </div>
-          <div className="mt-4 text-xs tracking-[0.3em] text-brand-700 font-bold">
+          <div className="mt-4 text-xs tracking-[0.3em] text-brand-300 font-bold">
             {scanning ? "SCANNING" : "DEVICES FOUND"}
           </div>
           <div className="text-sm text-slate-500 mt-1">
@@ -83,7 +83,7 @@ export default function SensorPairScreen({
             [0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="h-16 rounded-2xl bg-white ring-1 ring-slate-200 animate-pulse"
+                className="h-16 rounded-2xl bg-slate-800 ring-1 ring-slate-700 animate-pulse"
               />
             ))}
 
@@ -97,22 +97,22 @@ export default function SensorPairScreen({
                   className={
                     "w-full flex items-center gap-3 px-4 py-3 rounded-2xl ring-1 text-left transition-colors " +
                     (isConnected
-                      ? "bg-brand-50 ring-brand-300"
-                      : "bg-white ring-slate-200 hover:bg-slate-50")
+                      ? "bg-brand-500/15 ring-brand-500/50"
+                      : "bg-slate-900 ring-slate-700 hover:bg-slate-800/60")
                   }
                 >
                   <div
                     className={
                       "w-10 h-10 rounded-xl flex items-center justify-center " +
                       (isConnected
-                        ? "bg-brand-100 text-brand-700"
-                        : "bg-slate-100 text-slate-500")
+                        ? "bg-brand-500/25 text-brand-300"
+                        : "bg-slate-800 text-slate-500")
                     }
                   >
                     <Wifi size={18} />
                   </div>
                   <div className="flex-1">
-                    <div className="font-semibold text-sm text-slate-900">
+                    <div className="font-semibold text-sm text-slate-100">
                       {d.name}
                     </div>
                     <div className="text-[11px] text-slate-500">
@@ -120,7 +120,7 @@ export default function SensorPairScreen({
                     </div>
                   </div>
                   {isConnected && (
-                    <CheckCircle2 size={18} className="text-brand-700" />
+                    <CheckCircle2 size={18} className="text-brand-300" />
                   )}
                 </button>
               );
@@ -129,7 +129,7 @@ export default function SensorPairScreen({
 
         <p className="mt-6 text-[11px] leading-relaxed text-slate-500">
           Note: smartphones don't have built-in gas sensors. A production build of
-          TYRONE DETECTOR would pair here with an external Bluetooth sensor (e.g.
+          JKC GAS DETECTOR would pair here with an external Bluetooth sensor (e.g.
           MQ-series module on an ESP32) over the Web Bluetooth API.
         </p>
       </div>

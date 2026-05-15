@@ -44,16 +44,16 @@ export default function DashboardScreen({
   const stillDanger = status === "DANGER";
 
   return (
-    <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-3 pb-5 bg-slate-50">
+    <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-3 pb-5 bg-slate-950">
       {/* "Alarm silenced" reminder banner — shown while user has acknowledged
           a still-active gas alert. Auto-dismisses when readings hit SAFE. */}
       {alarmAcknowledged && stillDanger && (
-        <div className="mb-3 rounded-2xl bg-red-50 ring-1 ring-red-200 px-3 py-2.5 flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
-            <BellOff size={15} className="text-red-600" />
+        <div className="mb-3 rounded-2xl bg-red-500/15 ring-1 ring-red-500/40 px-3 py-2.5 flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center shrink-0">
+            <BellOff size={15} className="text-red-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-[12px] font-bold text-red-700">
+            <div className="text-[12px] font-bold text-red-300">
               Alarm silenced — gas is still elevated
             </div>
             <div className="text-[11px] text-red-600/80 mt-0.5">
@@ -70,7 +70,7 @@ export default function DashboardScreen({
           padded={false}
         >
           <div className="px-4 pt-5 pb-5">
-            <div className="text-[10px] tracking-[0.3em] font-bold text-slate-600 mb-1">
+            <div className="text-[10px] tracking-[0.3em] font-bold text-slate-300 mb-1">
               GAS LEVEL
             </div>
             <div className="flex items-baseline justify-center gap-1">
@@ -93,7 +93,7 @@ export default function DashboardScreen({
             >
               {accent.label === "HIGH GAS ALERT" ? "DANGER" : accent.label}
             </div>
-            <div className="text-[12px] text-slate-600 mt-0.5">
+            <div className="text-[12px] text-slate-300 mt-0.5">
               {status === "SAFE"
                 ? "Air is safe"
                 : status === "CAUTION"
@@ -114,40 +114,40 @@ export default function DashboardScreen({
           icon={ShieldCheck}
           label="System Status"
           value="Online"
-          valueClass="text-emerald-600"
-          iconBg="bg-emerald-50"
-          iconColor="text-emerald-600"
+          valueClass="text-emerald-400"
+          iconBg="bg-emerald-500/15"
+          iconColor="text-emerald-400"
         />
         <StatusTile
           icon={Wifi}
           label="Sensor Status"
           value={sensorReady ? "Active" : "Inactive"}
-          valueClass={sensorReady ? "text-brand-700" : "text-slate-500"}
-          iconBg={sensorReady ? "bg-brand-50" : "bg-slate-100"}
-          iconColor={sensorReady ? "text-brand-700" : "text-slate-400"}
+          valueClass={sensorReady ? "text-brand-300" : "text-slate-500"}
+          iconBg={sensorReady ? "bg-brand-500/15" : "bg-slate-800"}
+          iconColor={sensorReady ? "text-brand-300" : "text-slate-500"}
         />
         <StatusTile
           icon={Clock}
           label="Last Updated"
           value={sensorReady ? fmtClock(lastUpdated) : "—"}
-          valueClass="text-slate-700"
-          iconBg="bg-slate-100"
+          valueClass="text-slate-200"
+          iconBg="bg-slate-800"
           iconColor="text-slate-500"
         />
         <StatusTile
           icon={Thermometer}
           label="Temperature"
           value={sensorReady && temperature != null ? `${temperature} °C` : "—"}
-          valueClass={sensorReady ? "text-orange-600" : "text-slate-500"}
-          iconBg={sensorReady ? "bg-orange-50" : "bg-slate-100"}
-          iconColor={sensorReady ? "text-orange-500" : "text-slate-400"}
+          valueClass={sensorReady ? "text-orange-400" : "text-slate-500"}
+          iconBg={sensorReady ? "bg-orange-500/15" : "bg-slate-800"}
+          iconColor={sensorReady ? "text-orange-400" : "text-slate-500"}
         />
       </div>
 
       {/* Quick Actions */}
       <SectionTitle>Quick Actions</SectionTitle>
       <Card padded={false} className="overflow-hidden">
-        <div className="grid grid-cols-3 divide-x divide-slate-100">
+        <div className="grid grid-cols-3 divide-x divide-slate-800">
           <QuickAction
             icon={BarChart3}
             label="View History"
@@ -167,7 +167,7 @@ export default function DashboardScreen({
       </Card>
 
       {sensorReady && (
-        <p className="mt-3 text-[10px] text-slate-400 text-center">
+        <p className="mt-3 text-[10px] text-slate-500 text-center">
           Live monitoring active · connected to{" "}
           <span className="font-semibold text-slate-500">
             {connectedSensor.name}
@@ -180,18 +180,18 @@ export default function DashboardScreen({
 
 function PairSensorCTA({ onPair }) {
   return (
-    <Card padded={false} className="border-brand-200 bg-white">
+    <Card padded={false} className="border-brand-200 bg-slate-900">
       <div className="px-4 pt-5 pb-5 flex flex-col items-center text-center">
         <div className="relative w-16 h-16 flex items-center justify-center mb-3">
-          <span className="absolute inset-0 rounded-full bg-brand-100 animate-ping-slow opacity-50" />
-          <div className="relative w-14 h-14 rounded-full bg-brand-50 ring-2 ring-brand-200 flex items-center justify-center">
-            <Radar size={24} className="text-brand-700" />
+          <span className="absolute inset-0 rounded-full bg-brand-500/25 animate-ping-slow opacity-50" />
+          <div className="relative w-14 h-14 rounded-full bg-brand-500/15 ring-2 ring-brand-500/40 flex items-center justify-center">
+            <Radar size={24} className="text-brand-300" />
           </div>
         </div>
         <div className="text-[10px] tracking-[0.3em] font-bold text-slate-500 mb-1">
           NO SENSOR
         </div>
-        <div className="text-base font-bold text-slate-900">
+        <div className="text-base font-bold text-slate-100">
           Pair a sensor to start detecting gas
         </div>
         <div className="text-[12px] text-slate-500 mt-1 px-3">
@@ -240,12 +240,12 @@ function QuickAction({ icon: Icon, label, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center justify-center gap-2 py-4 px-2 hover:bg-slate-50 active:bg-slate-100 transition-colors"
+      className="flex flex-col items-center justify-center gap-2 py-4 px-2 hover:bg-slate-800/60 active:bg-slate-800 transition-colors"
     >
-      <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center">
-        <Icon size={18} className="text-brand-700" />
+      <div className="w-10 h-10 rounded-xl bg-brand-500/15 flex items-center justify-center">
+        <Icon size={18} className="text-brand-300" />
       </div>
-      <div className="text-[11px] font-semibold text-slate-700 text-center leading-tight">
+      <div className="text-[11px] font-semibold text-slate-200 text-center leading-tight">
         {label}
       </div>
     </button>

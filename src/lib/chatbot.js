@@ -157,7 +157,7 @@ const INTENTS = [
         "PPM = parts per million. 1000 PPM means 0.1% of the air volume is the gas.",
         "LEL% = lower explosive limit. 100% LEL is the minimum concentration that can ignite.",
         "For methane, 1% air concentration is roughly 20% LEL.",
-        "TYRONE alerts at the threshold you set in Notification Preferences.",
+        "JKC alerts at the threshold you set in Notification Preferences.",
       ],
     },
   },

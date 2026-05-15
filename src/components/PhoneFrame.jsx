@@ -1,44 +1,22 @@
 import { Signal, Wifi, BatteryFull } from "lucide-react";
 
-// Wraps the app in a phone-shaped container with a mock iOS-style status bar
-// at the top, matching the design mockup. On a real phone the OS status bar
-// covers the top; on desktop we render this faux bar so the layout looks
-// identical to the screenshot.
+// Wraps the app in a phone-shaped container. Uses dvh (dynamic viewport
+// height) so the on-screen keyboard pushes content up rather than hiding it.
 
-export default function PhoneFrame({ darkMode, children }) {
-  const isDark = !!darkMode;
+export default function PhoneFrame({ children }) {
   return (
-    <div
-      className={
-        (isDark
-          ? "bg-black text-zinc-100"
-          : "bg-slate-100 text-slate-900") +
-        " min-h-full w-full flex items-center justify-center sm:p-6"
-      }
-    >
-      <div
-        className={
-          (isDark
-            ? "bg-zinc-950 ring-zinc-800"
-            : "bg-slate-50 ring-slate-200") +
-          " relative w-full sm:max-w-[420px] sm:h-[860px] h-screen sm:rounded-[44px] overflow-hidden ring-1 sm:ring-4 flex flex-col shadow-card-lg"
-        }
-      >
-        <MockStatusBar darkMode={isDark} />
+    <div className="bg-black text-slate-100 min-h-[100dvh] w-full flex items-center justify-center sm:p-6">
+      <div className="relative w-full sm:max-w-[420px] sm:h-[860px] h-[100dvh] bg-slate-950 ring-1 sm:ring-4 ring-slate-800 sm:rounded-[44px] overflow-hidden flex flex-col shadow-card-lg">
+        <MockStatusBar />
         {children}
       </div>
     </div>
   );
 }
 
-function MockStatusBar({ darkMode }) {
+function MockStatusBar() {
   return (
-    <div
-      className={
-        (darkMode ? "bg-zinc-950 text-zinc-300" : "bg-slate-50 text-slate-700") +
-        " hidden sm:flex h-6 px-6 items-center justify-between text-[11px] font-semibold tracking-wide shrink-0"
-      }
-    >
+    <div className="hidden sm:flex h-6 px-6 items-center justify-between text-[11px] font-semibold tracking-wide shrink-0 bg-slate-950 text-slate-300">
       <span className="tabular-nums">9:41</span>
       <div className="flex items-center gap-1">
         <Signal size={12} />

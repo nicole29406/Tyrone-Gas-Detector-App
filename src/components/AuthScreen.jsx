@@ -27,7 +27,7 @@ import {
 } from "../lib/auth";
 
 const STRENGTH_COLORS = [
-  "bg-slate-200",
+  "bg-slate-700",
   "bg-red-500",
   "bg-orange-400",
   "bg-amber-400",
@@ -36,24 +36,24 @@ const STRENGTH_COLORS = [
 ];
 
 const inputCls =
-  "flex-1 bg-transparent py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none";
+  "flex-1 bg-transparent py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none";
 
 function Field({ icon: Icon, error, children }) {
   return (
     <div>
       <div
         className={
-          "flex items-center gap-2 bg-white ring-1 rounded-xl px-3 transition-colors " +
+          "flex items-center gap-2 bg-slate-900 ring-1 rounded-xl px-3 transition-colors " +
           (error
             ? "ring-red-300"
-            : "ring-slate-200 focus-within:ring-brand-500")
+            : "ring-slate-700 focus-within:ring-brand-500")
         }
       >
-        {Icon && <Icon size={15} className="text-slate-400" />}
+        {Icon && <Icon size={15} className="text-slate-500" />}
         {children}
       </div>
       {error && (
-        <div className="text-[11px] text-red-600 mt-1 ml-1">{error}</div>
+        <div className="text-[11px] text-red-400 mt-1 ml-1">{error}</div>
       )}
     </div>
   );
@@ -63,8 +63,8 @@ export default function AuthScreen({ onAuthed }) {
   const [mode, setMode] = useState("login"); // 'login' | 'signup'
 
   return (
-    <div className="min-h-screen w-full bg-slate-100 flex items-center justify-center p-4 sm:p-6">
-      <div className="w-full sm:max-w-[420px] bg-white sm:rounded-[32px] ring-1 sm:ring-2 ring-slate-200 px-5 py-6 sm:py-8 flex flex-col shadow-card-lg">
+    <div className="min-h-[100dvh] w-full bg-black flex items-center justify-center p-4 sm:p-6">
+      <div className="w-full sm:max-w-[420px] bg-slate-950 sm:rounded-[32px] ring-1 sm:ring-2 ring-slate-800 px-5 py-6 sm:py-8 flex flex-col shadow-card-lg">
         <Brand />
 
         {mode === "login" ? (
@@ -89,13 +89,13 @@ function Brand() {
       <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-600 to-brand-800 flex items-center justify-center shadow-lg">
         <Droplet size={28} className="text-white" fill="currentColor" />
       </div>
-      <div className="mt-3 text-base font-extrabold tracking-wide text-brand-700 leading-tight">
-        GAS LEAKAGE
+      <div className="mt-3 text-[10px] tracking-[0.35em] text-brand-300 font-semibold">
+        JKC
       </div>
-      <div className="text-base font-extrabold tracking-wide text-brand-700 leading-tight">
-        DETECTION SYSTEM
+      <div className="text-xl font-extrabold tracking-[0.18em] text-slate-100 leading-tight">
+        GAS DETECTOR
       </div>
-      <div className="mt-1 text-[12px] text-slate-500">Sign in to continue</div>
+      <div className="mt-1 text-[12px] text-slate-400">Sign in to continue</div>
     </div>
   );
 }
@@ -148,7 +148,7 @@ function LoginForm({ onAuthed, onSwitchMode }) {
         <button
           type="button"
           onClick={() => setShowPw((s) => !s)}
-          className="text-slate-400 hover:text-slate-600 pr-1"
+          className="text-slate-500 hover:text-slate-300 pr-1"
         >
           {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
         </button>
@@ -157,7 +157,7 @@ function LoginForm({ onAuthed, onSwitchMode }) {
       <div className="flex justify-end -mt-1">
         <button
           type="button"
-          className="text-[12px] text-brand-700 hover:text-brand-800 font-semibold"
+          className="text-[12px] text-brand-300 hover:text-brand-200 font-semibold"
           onClick={() =>
             setError(
               "Password reset is not yet wired up in this demo. Use 'Switch / add account' from Profile to re-create an account."
@@ -169,7 +169,7 @@ function LoginForm({ onAuthed, onSwitchMode }) {
       </div>
 
       {error && (
-        <div className="text-[11px] text-red-600 bg-red-50 ring-1 ring-red-200 rounded-lg px-3 py-2">
+        <div className="text-[11px] text-red-400 bg-red-500/15 ring-1 ring-red-500/40 rounded-lg px-3 py-2">
           {error}
         </div>
       )}
@@ -177,7 +177,7 @@ function LoginForm({ onAuthed, onSwitchMode }) {
       <button
         type="submit"
         disabled={busy}
-        className="w-full bg-brand-700 disabled:bg-slate-300 text-white font-bold tracking-wider text-sm py-3.5 rounded-xl hover:bg-brand-800 active:bg-brand-900 transition-colors"
+        className="w-full bg-brand-700 disabled:bg-slate-700 text-white font-bold tracking-wider text-sm py-3.5 rounded-xl hover:bg-brand-800 active:bg-brand-900 transition-colors"
       >
         {busy ? "SIGNING IN…" : "LOGIN"}
       </button>
@@ -187,7 +187,7 @@ function LoginForm({ onAuthed, onSwitchMode }) {
         <button
           type="button"
           onClick={onSwitchMode}
-          className="text-brand-700 font-bold hover:text-brand-800"
+          className="text-brand-300 font-bold hover:text-brand-200"
         >
           Register
         </button>
@@ -206,7 +206,7 @@ export function Avatar({ name, size = 36 }) {
     .toUpperCase();
   return (
     <div
-      className="rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center shrink-0"
+      className="rounded-full bg-brand-500/25 text-brand-300 font-bold flex items-center justify-center shrink-0"
       style={{ width: size, height: size, fontSize: size * 0.4 }}
     >
       {initials || "?"}
@@ -294,7 +294,7 @@ function SignupForm({ onAuthed, onSwitchMode }) {
           <button
             type="button"
             onClick={() => update({ email: suggestEmail(form.fullName) })}
-            className="text-[10px] font-bold tracking-wider text-brand-700 hover:text-brand-800 flex items-center gap-1 pr-1"
+            className="text-[10px] font-bold tracking-wider text-brand-300 hover:text-brand-200 flex items-center gap-1 pr-1"
             title="No email? Generate a demo one"
           >
             <Sparkles size={12} /> CREATE
@@ -340,7 +340,7 @@ function SignupForm({ onAuthed, onSwitchMode }) {
           <button
             type="button"
             onClick={() => setShowPw((s) => !s)}
-            className="text-slate-400 hover:text-slate-600 pr-1"
+            className="text-slate-500 hover:text-slate-300 pr-1"
           >
             {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
           </button>
@@ -351,7 +351,7 @@ function SignupForm({ onAuthed, onSwitchMode }) {
               key={i}
               className={
                 "h-1 flex-1 rounded-full " +
-                (i <= strength ? STRENGTH_COLORS[strength] : "bg-slate-200")
+                (i <= strength ? STRENGTH_COLORS[strength] : "bg-slate-700")
               }
             />
           ))}
@@ -363,7 +363,7 @@ function SignupForm({ onAuthed, onSwitchMode }) {
       </div>
 
       {submitError && (
-        <div className="text-[11px] text-red-600 bg-red-50 ring-1 ring-red-200 rounded-lg px-3 py-2">
+        <div className="text-[11px] text-red-400 bg-red-500/15 ring-1 ring-red-500/40 rounded-lg px-3 py-2">
           {submitError}
         </div>
       )}
@@ -371,7 +371,7 @@ function SignupForm({ onAuthed, onSwitchMode }) {
       <button
         type="submit"
         disabled={busy}
-        className="w-full bg-brand-700 disabled:bg-slate-300 text-white font-bold tracking-wider text-sm py-3.5 rounded-xl hover:bg-brand-800 active:bg-brand-900 transition-colors flex items-center justify-center gap-2"
+        className="w-full bg-brand-700 disabled:bg-slate-700 text-white font-bold tracking-wider text-sm py-3.5 rounded-xl hover:bg-brand-800 active:bg-brand-900 transition-colors flex items-center justify-center gap-2"
       >
         <Plus size={14} /> {busy ? "CREATING…" : "CREATE ACCOUNT"}
       </button>
@@ -381,7 +381,7 @@ function SignupForm({ onAuthed, onSwitchMode }) {
         <button
           type="button"
           onClick={onSwitchMode}
-          className="text-brand-700 font-bold hover:text-brand-800"
+          className="text-brand-300 font-bold hover:text-brand-200"
         >
           Sign in
         </button>

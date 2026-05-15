@@ -254,5 +254,5 @@ export function suggestEmail(fullName) {
     .slice(0, 24) || "user";
   const rand = Math.floor(1000 + Math.random() * 9000);
   // Demo-only domain — this address is a placeholder, not a real mailbox.
-  return `${base}.${rand}@tyrone-detector.app`;
+  return `${base}.${rand}@jkc-detector.app`;
 }

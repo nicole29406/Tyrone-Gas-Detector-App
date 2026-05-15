@@ -2,11 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- viewport-fit=cover handles notched phones; interactive-widget shrinks
+         the viewport when the on-screen keyboard opens so inputs stay visible. -->
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
     />
-    <meta name="theme-color" content="#09090b" />
+    <meta name="theme-color" content="#020617" />
 
     <!-- PWA / iOS install -->
     <link rel="icon" type="image/svg+xml" href="icon.svg" />
@@ -15,12 +17,12 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Tyrone" />
-    <meta name="description" content="Gas leak detection & safety companion. Live monitoring, SMS escalation, and emergency contacts." />
+    <meta name="apple-mobile-web-app-title" content="JKC" />
+    <meta name="description" content="JKC Gas Detector — live gas leak monitoring, SMS escalation, and emergency contacts." />
 
-    <title>TYRONE DETECTOR</title>
+    <title>JKC GAS DETECTOR</title>
   </head>
-  <body class="bg-black">
+  <body class="bg-slate-950">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

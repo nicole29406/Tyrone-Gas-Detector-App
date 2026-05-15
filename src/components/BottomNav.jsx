@@ -9,7 +9,7 @@ const TABS = [
 
 export default function BottomNav({ activeTab, onChange, alertBadge }) {
   return (
-    <nav className="bg-white border-t border-slate-200 pb-3 pt-2 px-2 flex items-end justify-around shrink-0">
+    <nav className="bg-slate-950/95 backdrop-blur-xl border-t border-slate-800 pb-3 pt-2 px-2 flex items-end justify-around shrink-0">
       {TABS.map(({ id, label, Icon }) => {
         const active = id === activeTab;
         const showBadge = id === "alerts" && alertBadge > 0;
@@ -24,7 +24,7 @@ export default function BottomNav({ activeTab, onChange, alertBadge }) {
                 size={20}
                 className={
                   "transition-colors " +
-                  (active ? "text-brand-700" : "text-slate-400")
+                  (active ? "text-brand-300" : "text-slate-500")
                 }
                 strokeWidth={active ? 2.2 : 1.7}
               />
@@ -37,7 +37,7 @@ export default function BottomNav({ activeTab, onChange, alertBadge }) {
             <span
               className={
                 "text-[10px] font-medium transition-colors " +
-                (active ? "text-brand-700 font-semibold" : "text-slate-400")
+                (active ? "text-brand-300 font-semibold" : "text-slate-500")
               }
             >
               {label}

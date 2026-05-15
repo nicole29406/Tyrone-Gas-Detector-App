@@ -35,7 +35,7 @@ export async function sendTestSms({ to, region, name }) {
   }
   const firstName = name?.split(" ")[0] || "there";
   const body =
-    `TYRONE DETECTOR test — hi ${firstName}, your SMS alerts are working. ` +
+    `JKC GAS DETECTOR test — hi ${firstName}, your SMS alerts are working. ` +
     `You'll receive a message like this if gas is detected at home.`;
   try {
     const res = await fetch(`${ENDPOINT}/api/sms`, {
@@ -67,7 +67,7 @@ function composeAlertMessage({ user, gas, ppm }) {
   const firstName = user?.fullName?.split(" ")[0] || "User";
   const reading = gas && ppm ? ` ${gas} ${ppm} PPM.` : "";
   return (
-    `TYRONE DETECTOR ALERT: Gas leak detected at your registered address.` +
+    `JKC GAS DETECTOR ALERT: Gas leak detected at your registered address.` +
     `${reading} Evacuate immediately, ${firstName}. ` +
     `Gas Emergency Line: ${GAS_EMERGENCY_LINE}.`
   );

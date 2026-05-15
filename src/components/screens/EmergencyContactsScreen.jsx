@@ -26,29 +26,29 @@ const SYSTEM_CONTACTS = [
     label: "Emergency Services",
     number: "0771938039",
     icon: ShieldAlert,
-    color: "text-red-600",
-    bg: "bg-red-50",
+    color: "text-red-400",
+    bg: "bg-red-500/15",
   },
   {
     id: "gas",
     label: "Gas Emergency Line",
     number: "0788246984",
     icon: Flame,
-    color: "text-orange-600",
-    bg: "bg-orange-50",
+    color: "text-orange-400",
+    bg: "bg-orange-500/15",
   },
   {
     id: "fire",
     label: "Local Fire Department",
     number: "112",
     icon: Stethoscope,
-    color: "text-amber-600",
-    bg: "bg-amber-50",
+    color: "text-amber-400",
+    bg: "bg-amber-500/15",
   },
 ];
 
 const inputCls =
-  "w-full bg-slate-50 ring-1 ring-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-brand-500";
+  "w-full bg-slate-950 ring-1 ring-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-brand-400";
 
 export default function EmergencyContactsScreen({
   settings,
@@ -122,15 +122,15 @@ export default function EmergencyContactsScreen({
   };
 
   return (
-    <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-3 pb-5 bg-slate-50">
+    <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-3 pb-5 bg-slate-950">
       <SectionTitle>Primary Contact (auto-dial)</SectionTitle>
       <Card>
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center">
-            <Phone size={18} className="text-brand-700" />
+          <div className="w-10 h-10 rounded-xl bg-brand-500/15 flex items-center justify-center">
+            <Phone size={18} className="text-brand-300" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-semibold text-slate-900">
+            <div className="text-sm font-semibold text-slate-100">
               Auto-dial number
             </div>
             <div className="text-[11px] text-slate-500">
@@ -151,7 +151,7 @@ export default function EmergencyContactsScreen({
             setSettings((s) => ({ ...s, emergencyContact: e.target.value }))
           }
           placeholder="0771938039"
-          className="w-full bg-slate-50 ring-1 ring-slate-200 rounded-lg px-3 py-2 text-sm font-mono tabular-nums text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-brand-500"
+          className="w-full bg-slate-950 ring-1 ring-slate-700 rounded-lg px-3 py-2 text-sm font-mono tabular-nums text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-brand-400"
         />
       </Card>
 
@@ -161,7 +161,7 @@ export default function EmergencyContactsScreen({
           !adding && (
             <button
               onClick={() => setAdding(true)}
-              className="text-[11px] font-bold tracking-wider text-brand-700 hover:text-brand-800 flex items-center gap-1"
+              className="text-[11px] font-bold tracking-wider text-brand-300 hover:text-brand-200 flex items-center gap-1"
             >
               <Plus size={12} /> ADD
             </button>
@@ -173,20 +173,20 @@ export default function EmergencyContactsScreen({
 
       <Card padded={false} className="overflow-hidden">
         {/* The account's own number — always a recipient */}
-        <div className="px-4 py-3 bg-brand-50/40 border-b border-slate-100">
+        <div className="px-4 py-3 bg-brand-500/10 border-b border-slate-800">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-brand-100 flex items-center justify-center">
-              <User size={16} className="text-brand-700" />
+            <div className="w-9 h-9 rounded-xl bg-brand-500/25 flex items-center justify-center">
+              <User size={16} className="text-brand-300" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-semibold text-slate-900 truncate">
+              <div className="text-sm font-semibold text-slate-100 truncate">
                 You ({user?.fullName || "—"})
               </div>
               <div className="text-[11px] text-slate-500 font-mono">
                 {user?.phone || "—"}
               </div>
             </div>
-            <span className="text-[10px] font-bold tracking-wider text-brand-700 bg-brand-100 rounded-full px-2 py-0.5">
+            <span className="text-[10px] font-bold tracking-wider text-brand-300 bg-brand-500/25 rounded-full px-2 py-0.5">
               ALWAYS
             </span>
           </div>
@@ -206,13 +206,13 @@ export default function EmergencyContactsScreen({
         )}
 
         {additional.map((c) => (
-          <div key={c.id} className="px-4 py-3 border-t border-slate-100">
+          <div key={c.id} className="px-4 py-3 border-t border-slate-800">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center">
-                <Users size={16} className="text-emerald-600" />
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center">
+                <Users size={16} className="text-emerald-400" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold text-slate-900 truncate">
+                <div className="text-sm font-semibold text-slate-100 truncate">
                   {c.name}
                 </div>
                 <div className="text-[11px] text-slate-500 font-mono">
@@ -221,14 +221,14 @@ export default function EmergencyContactsScreen({
               </div>
               <a
                 href={`tel:${c.phone}`}
-                className="text-slate-500 hover:text-brand-700 p-1.5"
+                className="text-slate-500 hover:text-brand-300 p-1.5"
                 aria-label="Call"
               >
                 <Phone size={14} />
               </a>
               <button
                 onClick={() => removeContact(c.id)}
-                className="text-slate-400 hover:text-red-600 p-1.5"
+                className="text-slate-500 hover:text-red-400 p-1.5"
                 aria-label="Remove"
               >
                 <Trash2 size={14} />
@@ -244,7 +244,7 @@ export default function EmergencyContactsScreen({
         ))}
 
         {adding && (
-          <div className="px-4 py-3 border-t border-slate-100 bg-slate-50/50 space-y-2">
+          <div className="px-4 py-3 border-t border-slate-800 bg-slate-950/50 space-y-2">
             <input
               autoFocus
               value={draft.name}
@@ -275,7 +275,7 @@ export default function EmergencyContactsScreen({
               ))}
             </select>
             {draftError && (
-              <div className="text-[11px] text-red-600 bg-red-50 ring-1 ring-red-200 rounded-lg px-3 py-1.5">
+              <div className="text-[11px] text-red-400 bg-red-500/15 ring-1 ring-red-500/40 rounded-lg px-3 py-1.5">
                 {draftError}
               </div>
             )}
@@ -296,7 +296,7 @@ export default function EmergencyContactsScreen({
                     region: user?.region || "Zimbabwe",
                   });
                 }}
-                className="px-3 py-2 text-[12px] font-bold tracking-wide text-slate-600 hover:text-slate-900"
+                className="px-3 py-2 text-[12px] font-bold tracking-wide text-slate-300 hover:text-slate-100"
               >
                 <X size={14} />
               </button>
@@ -308,7 +308,7 @@ export default function EmergencyContactsScreen({
       <p className="mt-2 text-[11px] text-slate-500 px-1">
         All recipients listed here receive an SMS when the alarm fires.
         <br />
-        <span className="text-amber-700">
+        <span className="text-amber-300">
           Twilio trial accounts can only send to verified numbers — verify each
           contact at console.twilio.com first.
         </span>
@@ -321,12 +321,12 @@ export default function EmergencyContactsScreen({
       )}
 
       <SectionTitle>System Emergency Contacts</SectionTitle>
-      <Card padded={false} className="divide-y divide-slate-100 overflow-hidden">
+      <Card padded={false} className="divide-y divide-slate-800 overflow-hidden">
         {SYSTEM_CONTACTS.map(({ id, label, number, icon: Icon, color, bg }) => (
           <a
             key={id}
             href={`tel:${number}`}
-            className="flex items-center gap-3 px-4 py-3.5 hover:bg-slate-50 active:bg-slate-100 transition-colors"
+            className="flex items-center gap-3 px-4 py-3.5 hover:bg-slate-800/60 active:bg-slate-800 transition-colors"
           >
             <div
               className={
@@ -336,14 +336,14 @@ export default function EmergencyContactsScreen({
               <Icon size={18} className={color} />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-semibold text-slate-900 truncate">
+              <div className="text-sm font-semibold text-slate-100 truncate">
                 {label}
               </div>
               <div className="text-[12px] text-slate-500 font-mono tabular-nums">
                 {number}
               </div>
             </div>
-            <Phone size={14} className="text-slate-400" />
+            <Phone size={14} className="text-slate-500" />
           </a>
         ))}
       </Card>
@@ -362,7 +362,7 @@ function TestButton({ status, onClick }) {
   }
   if (status?.result?.ok) {
     return (
-      <div className="mt-2 ml-12 flex items-start gap-1.5 text-[11px] text-emerald-700 bg-emerald-50 ring-1 ring-emerald-200 rounded-lg px-2 py-1.5">
+      <div className="mt-2 ml-12 flex items-start gap-1.5 text-[11px] text-emerald-300 bg-emerald-500/15 ring-1 ring-emerald-500/40 rounded-lg px-2 py-1.5">
         <CheckCircle2 size={11} className="mt-0.5 shrink-0" />
         <span>
           Sent! Twilio status:{" "}
@@ -374,7 +374,7 @@ function TestButton({ status, onClick }) {
   }
   if (status?.result && !status.result.ok) {
     return (
-      <div className="mt-2 ml-12 flex items-start gap-1.5 text-[11px] text-red-700 bg-red-50 ring-1 ring-red-200 rounded-lg px-2 py-1.5">
+      <div className="mt-2 ml-12 flex items-start gap-1.5 text-[11px] text-red-300 bg-red-500/15 ring-1 ring-red-500/40 rounded-lg px-2 py-1.5">
         <XCircle size={11} className="mt-0.5 shrink-0" />
         <div className="flex-1 min-w-0">
           <div className="font-semibold">
@@ -391,7 +391,7 @@ function TestButton({ status, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="mt-2 ml-12 flex items-center gap-1.5 text-[11px] font-semibold text-brand-700 hover:text-brand-800"
+      className="mt-2 ml-12 flex items-center gap-1.5 text-[11px] font-semibold text-brand-300 hover:text-brand-200"
     >
       <Send size={11} /> Test SMS
     </button>

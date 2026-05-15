@@ -27,12 +27,12 @@ export default defineConfig(({ command }) => {
           "favicon-32.png",
         ],
         manifest: {
-          name: "TYRONE DETECTOR",
-          short_name: "Tyrone",
+          name: "JKC GAS DETECTOR",
+          short_name: "JKC",
           description:
-            "Gas leak detection & safety companion. Live monitoring, SMS escalation, and emergency contacts.",
-          theme_color: "#09090b",
-          background_color: "#000000",
+            "JKC Gas Detector — live gas leak monitoring, SMS escalation, and emergency contacts.",
+          theme_color: "#020617",
+          background_color: "#020617",
           display: "standalone",
           orientation: "portrait",
           start_url: base,
