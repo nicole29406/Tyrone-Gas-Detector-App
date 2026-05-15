@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   Droplet,
   Eye,
@@ -11,15 +11,12 @@ import {
   Lock,
   Sparkles,
   Plus,
-  ChevronRight,
 } from "lucide-react";
 import {
   REGIONS,
   createAccount,
-  loadAccounts,
   loginAccount,
   passwordStrength,
-  saveSession,
   strengthLabel,
   suggestEmail,
   validateDob,
@@ -64,7 +61,6 @@ function Field({ icon: Icon, error, children }) {
 
 export default function AuthScreen({ onAuthed }) {
   const [mode, setMode] = useState("login"); // 'login' | 'signup'
-  const accounts = useMemo(loadAccounts, []);
 
   return (
     <div className="min-h-screen w-full bg-slate-100 flex items-center justify-center p-4 sm:p-6">
@@ -75,7 +71,6 @@ export default function AuthScreen({ onAuthed }) {
           <LoginForm
             onAuthed={onAuthed}
             onSwitchMode={() => setMode("signup")}
-            accounts={accounts}
           />
         ) : (
           <SignupForm
@@ -107,7 +102,7 @@ function Brand() {
 
 // ---------------- LOGIN ----------------
 
-function LoginForm({ onAuthed, onSwitchMode, accounts }) {
+function LoginForm({ onAuthed, onSwitchMode }) {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -197,48 +192,7 @@ function LoginForm({ onAuthed, onSwitchMode, accounts }) {
           Register
         </button>
       </div>
-
-      {accounts.length > 0 && (
-        <SavedAccounts accounts={accounts} onAuthed={onAuthed} />
-      )}
     </form>
-  );
-}
-
-function SavedAccounts({ accounts, onAuthed }) {
-  return (
-    <div className="mt-6 pt-4 border-t border-slate-100">
-      <div className="text-[10px] tracking-[0.3em] text-slate-500 font-bold mb-2">
-        SAVED ACCOUNTS
-      </div>
-      <div className="space-y-1.5">
-        {accounts.map((a) => (
-          <button
-            key={a.id}
-            type="button"
-            onClick={() => {
-              saveSession(a.id);
-              onAuthed(a);
-            }}
-            className="w-full flex items-center gap-3 bg-slate-50 hover:bg-slate-100 ring-1 ring-slate-200 rounded-xl px-3 py-2 text-left"
-          >
-            <Avatar name={a.fullName} size={32} />
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-semibold text-slate-900 truncate">
-                {a.fullName}
-              </div>
-              <div className="text-[11px] text-slate-500 truncate">
-                {a.phone} · {a.region}
-              </div>
-            </div>
-            <ChevronRight size={14} className="text-slate-400" />
-          </button>
-        ))}
-      </div>
-      <p className="mt-2 text-[10px] text-slate-400 text-center">
-        Quick-switch keeps you signed in on this device.
-      </p>
-    </div>
   );
 }
 

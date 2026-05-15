@@ -8,22 +8,24 @@ import {
   XCircle,
   Loader2,
   CloudOff,
+  Users,
 } from "lucide-react";
-import { sendEmergencySms, isSmsConfigured, endpointHost } from "../lib/sms";
+import {
+  isSmsConfigured,
+  endpointHost,
+  sendEmergencySmsAll,
+} from "../lib/sms";
 
 // Escalation flow:
 //   1. Alarm fires AND a sensor is paired → escalation begins.
-//   2. Every REPEAT_EVERY_SECONDS we POST to the SMS Worker, which forwards to
-//      Twilio. The toast updates with send status (pending → sent / failed).
-//   3. If the user doesn't acknowledge within ESCALATION_SECONDS, we auto-dial
-//      the gas emergency line via a `tel:` link.
-//   4. If the build has no VITE_SMS_ENDPOINT configured, the toast still shows
-//      and the auto-call still fires — only the real-SMS send is skipped
-//      (status "simulated").
+//   2. Every REPEAT_EVERY_SECONDS we fan out an SMS to the user AND any
+//      additional emergency contacts.
+//   3. If the user doesn't acknowledge within ESCALATION_SECONDS we auto-dial
+//      the gas emergency line via a tel: link.
 
 const GAS_EMERGENCY_LINE = "0788246984";
 const ESCALATION_SECONDS = 60;
-const REPEAT_EVERY_SECONDS = 15; // sends at t=0, 15s, 30s, 45s
+const REPEAT_EVERY_SECONDS = 15;
 
 function StatusBadge({ status, hint }) {
   if (status === "pending") {
@@ -40,6 +42,13 @@ function StatusBadge({ status, hint }) {
       </span>
     );
   }
+  if (status === "partial") {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] text-amber-400 font-mono">
+        <CheckCircle2 size={10} /> partial
+      </span>
+    );
+  }
   if (status === "failed") {
     return (
       <span
@@ -52,7 +61,7 @@ function StatusBadge({ status, hint }) {
   }
   if (status === "simulated") {
     return (
-      <span className="inline-flex items-center gap-1 text-[10px] text-zinc-500 font-mono">
+      <span className="inline-flex items-center gap-1 text-[10px] text-zinc-400 font-mono">
         <CloudOff size={10} /> sim
       </span>
     );
@@ -63,6 +72,7 @@ function StatusBadge({ status, hint }) {
 export default function SmsEscalation({
   active,
   user,
+  additionalContacts = [],
   gas,
   ppm,
   onAcknowledge,
@@ -71,25 +81,31 @@ export default function SmsEscalation({
   const [sendCount, setSendCount] = useState(0);
   const [lastStatus, setLastStatus] = useState("idle");
   const [lastError, setLastError] = useState(null);
+  const [sentRatio, setSentRatio] = useState({ sent: 0, total: 0 });
   const placedCallRef = useRef(false);
   const abortRef = useRef(null);
   const userRef = useRef(user);
+  const contactsRef = useRef(additionalContacts);
   const gasRef = useRef({ gas, ppm });
 
-  // Keep latest user/gas in refs so the interval reads current values
   useEffect(() => {
     userRef.current = user;
   }, [user]);
   useEffect(() => {
+    contactsRef.current = additionalContacts;
+  }, [additionalContacts]);
+  useEffect(() => {
     gasRef.current = { gas, ppm };
   }, [gas, ppm]);
 
-  // Send an SMS now (with abort support)
   const fireSms = async () => {
     if (!isSmsConfigured()) {
       setLastStatus("simulated");
       setLastError(null);
       setSendCount((c) => c + 1);
+      // Track the simulated recipient count for the UI
+      const total = 1 + (contactsRef.current?.length || 0);
+      setSentRatio({ sent: 0, total });
       return;
     }
     if (abortRef.current) abortRef.current.abort();
@@ -99,30 +115,36 @@ export default function SmsEscalation({
     setLastError(null);
     setSendCount((c) => c + 1);
 
-    const result = await sendEmergencySms({
+    const result = await sendEmergencySmsAll({
       user: userRef.current,
+      additionalContacts: contactsRef.current,
       gas: gasRef.current.gas,
       ppm: gasRef.current.ppm,
       signal: abortRef.current.signal,
     });
 
-    if (result.ok) {
-      setLastStatus("sent");
-    } else if (result.reason === "aborted") {
-      // Don't update status — a newer send superseded this one
-    } else {
+    setSentRatio({ sent: result.sent, total: result.total });
+
+    if (result.sent === 0) {
+      const firstFail = result.results?.find((r) => !r.ok);
       setLastStatus("failed");
-      setLastError(result.hint || result.reason || "Send failed");
+      setLastError(firstFail?.hint || firstFail?.reason || result.reason);
+    } else if (result.sent === result.total) {
+      setLastStatus("sent");
+    } else {
+      setLastStatus("partial");
+      const firstFail = result.results?.find((r) => !r.ok);
+      setLastError(firstFail?.hint || firstFail?.reason);
     }
   };
 
   useEffect(() => {
     if (!active) {
-      // Reset state and cancel any in-flight send
       setRemaining(ESCALATION_SECONDS);
       setSendCount(0);
       setLastStatus("idle");
       setLastError(null);
+      setSentRatio({ sent: 0, total: 0 });
       placedCallRef.current = false;
       if (abortRef.current) abortRef.current.abort();
       return;
@@ -132,9 +154,7 @@ export default function SmsEscalation({
     setRemaining(ESCALATION_SECONDS);
     setSendCount(0);
     setLastStatus("idle");
-    setLastError(null);
 
-    // Fire the first SMS immediately
     fireSms();
 
     const tick = setInterval(() => {
@@ -148,7 +168,6 @@ export default function SmsEscalation({
           }
           return 0;
         }
-        // Fire a follow-up SMS every REPEAT_EVERY_SECONDS
         const elapsed = ESCALATION_SECONDS - next;
         if (elapsed > 0 && elapsed % REPEAT_EVERY_SECONDS === 0) {
           fireSms();
@@ -173,6 +192,7 @@ export default function SmsEscalation({
   });
   const configured = isSmsConfigured();
   const host = endpointHost();
+  const totalRecipients = 1 + (additionalContacts?.length || 0);
 
   return (
     <div className="absolute top-3 left-3 right-3 z-[60] pointer-events-none">
@@ -208,10 +228,15 @@ export default function SmsEscalation({
               .
             </div>
             <div className="flex items-center justify-between mt-2.5 gap-2">
-              <div className="text-[10px] tracking-widest text-zinc-500 flex items-center gap-1 min-w-0">
+              <div className="text-[10px] tracking-widest text-zinc-500 flex items-center gap-1.5 min-w-0">
                 <AlertOctagon size={11} className="text-red-400 shrink-0" />
-                <span className="truncate">
-                  SMS #{sendCount} → {user?.phone || "—"}
+                <span className="truncate flex items-center gap-1">
+                  SMS #{sendCount}
+                  {totalRecipients > 1 && (
+                    <span className="flex items-center gap-0.5 text-emerald-400 normal-case tracking-normal">
+                      <Users size={10} /> {sentRatio.sent}/{sentRatio.total || totalRecipients}
+                    </span>
+                  )}
                 </span>
                 <StatusBadge status={lastStatus} hint={lastError} />
               </div>
@@ -243,7 +268,7 @@ export default function SmsEscalation({
       </div>
       <p className="mt-1.5 text-center text-[9px] text-zinc-600 px-3">
         {configured
-          ? `Live: SMS via ${host}`
+          ? `Live: ${totalRecipients} recipient${totalRecipients > 1 ? "s" : ""} · via ${host}`
           : "Simulation mode — set VITE_SMS_ENDPOINT to enable real SMS"}
       </p>
     </div>

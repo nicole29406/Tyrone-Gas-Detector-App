@@ -30,8 +30,6 @@ import {
 import { startAlarm, stopAlarm } from "./lib/audio";
 import {
   DEFAULT_ACCOUNT_SETTINGS,
-  getAccountById,
-  loadSession,
   saveSession,
   updateAccount,
 } from "./lib/auth";
@@ -83,11 +81,15 @@ const TITLE_FOR = {
 
 export default function App() {
   // ----- auth -----
-  const [user, setUser] = useState(() => {
-    const sess = loadSession();
-    return sess ? getAccountById(sess.accountId) : null;
-  });
+  // Always start signed-out. Even though a session may be persisted in
+  // localStorage from a previous run, we deliberately ignore it so every
+  // app launch returns the user to the login screen — a more secure default.
+  const [user, setUser] = useState(null);
   const [showAuth, setShowAuth] = useState(false);
+  // One-time cleanup: drop any stale session token from a previous run.
+  useEffect(() => {
+    saveSession(null);
+  }, []);
 
   // ----- per-account state (persisted) -----
   const [settings, setSettings] = useState(
@@ -128,10 +130,23 @@ export default function App() {
     updateAccount(user.id, { settings, alertLog });
   }, [settings, alertLog, user?.id]);
 
-  // Always-on live monitoring (this design has no toggle — the app shows
-  // "System is monitoring" on the dashboard at all times when logged in).
+  // Reset live readings to zero whenever the sensor disconnects (or is not
+  // yet paired). Without a sensor the dashboard shows 0 PPM + "Pair sensor".
   useEffect(() => {
-    if (!user) return;
+    if (!connectedSensor) {
+      setLiveReading(0);
+      setAlarmActive(false);
+      setEscalationActive(false);
+      stopAlarm();
+    } else {
+      setLastUpdated(Date.now());
+    }
+  }, [connectedSensor]);
+
+  // Live monitoring loop. Only runs when a sensor is paired — matching the
+  // real-world behavior of the app (no sensor → no readings).
+  useEffect(() => {
+    if (!user || !connectedSensor) return;
     const id = setInterval(() => {
       setLiveReading((prev) => {
         const next = nextLiveReading(prev);
@@ -166,7 +181,7 @@ export default function App() {
     }, 1000);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, settings.threshold, settings.vibrationOn]);
+  }, [user?.id, connectedSensor?.id, settings.threshold, settings.vibrationOn]);
 
   // Periodically pick a fresh "last detected gas" candidate so the log entries
   // aren't all the same gas. Cheap — once a minute.
@@ -241,7 +256,9 @@ export default function App() {
       ? {
           variant: "dashboard",
           greeting: `Hello, ${firstName}`,
-          subtitle: "System is monitoring",
+          subtitle: connectedSensor
+            ? "System is monitoring"
+            : "Sensor not connected",
           onMenu: () => setScreen("profile"),
           onBell: () => setScreen("alerts"),
           bellBadge: unseenAlerts,
@@ -265,8 +282,8 @@ export default function App() {
             temperature={temperature}
             lastUpdated={lastUpdated}
             connectedSensor={connectedSensor}
-            monitoringOn={true}
             onQuickAction={handleQuickAction}
+            onPairSensor={() => setSensorPairOpen(true)}
           />
         )}
         {screen === "alerts" && (
@@ -301,6 +318,7 @@ export default function App() {
           <EmergencyContactsScreen
             settings={settings}
             setSettings={setSettings}
+            user={user}
           />
         )}
         {screen === "security" && (
@@ -332,6 +350,7 @@ export default function App() {
         <SmsEscalation
           active={escalationActive}
           user={user}
+          additionalContacts={settings.additionalContacts || []}
           gas={lastGas}
           ppm={liveReading}
           onAcknowledge={() => setEscalationActive(false)}

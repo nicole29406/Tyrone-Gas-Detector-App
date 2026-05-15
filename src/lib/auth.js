@@ -36,8 +36,14 @@ export const DEFAULT_ACCOUNT_SETTINGS = {
   vibrationOn: true,
   threshold: 400,
   units: "ppm",
-  darkMode: true,
+  darkMode: false,
   emergencyContact: "0771938039", // default emergency services
+  // Additional recipients (family / neighbours / second phone). Each gets a
+  // real SMS via Twilio when the alarm fires. Twilio trial accounts require
+  // each number to be verified first at console.twilio.com.
+  additionalContacts: [
+    // { id: "c-xxx", name: "Mum", phone: "+263...", region: "Zimbabwe" }
+  ],
 };
 
 // ---------- storage ----------

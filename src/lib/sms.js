@@ -29,33 +29,12 @@ function composeAlertMessage({ user, gas, ppm }) {
   );
 }
 
-export async function sendEmergencySms({ user, gas, ppm, signal }) {
-  if (!ENDPOINT) {
-    return {
-      ok: false,
-      reason: "no-endpoint",
-      message: "SMS provider not configured for this build.",
-    };
-  }
-  if (!user?.phone) {
-    return {
-      ok: false,
-      reason: "no-phone",
-      message: "Logged-in account has no phone number.",
-    };
-  }
-
-  const payload = {
-    to: user.phone,
-    region: user.region,
-    message: composeAlertMessage({ user, gas, ppm }),
-  };
-
+async function sendOne({ to, region, message, signal }) {
   try {
     const res = await fetch(`${ENDPOINT}/api/sms`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ to, region, message }),
       signal,
     });
     const data = await res.json().catch(() => ({}));
@@ -75,13 +54,105 @@ export async function sendEmergencySms({ user, gas, ppm, signal }) {
       sentAt: data.sentAt,
     };
   } catch (err) {
-    if (err.name === "AbortError") {
-      return { ok: false, reason: "aborted" };
-    }
+    if (err.name === "AbortError") return { ok: false, reason: "aborted" };
     return {
       ok: false,
       reason: "network-error",
       message: err.message || String(err),
     };
   }
+}
+
+// Build the recipient list: the logged-in user plus every additional contact.
+// Deduplicates by phone number.
+export function buildRecipients(user, additionalContacts = []) {
+  const recipients = [];
+  const seen = new Set();
+  if (user?.phone) {
+    seen.add(user.phone);
+    recipients.push({
+      id: "self",
+      name: user.fullName?.split(" ")[0] || "You",
+      phone: user.phone,
+      region: user.region,
+      isSelf: true,
+    });
+  }
+  for (const c of additionalContacts) {
+    if (!c?.phone || seen.has(c.phone)) continue;
+    seen.add(c.phone);
+    recipients.push({
+      id: c.id,
+      name: c.name,
+      phone: c.phone,
+      region: c.region || user?.region,
+    });
+  }
+  return recipients;
+}
+
+// Fan-out: send the alert SMS to every recipient in parallel. The returned
+// object holds per-recipient results plus an aggregate summary so the UI can
+// show "3/4 sent" style status.
+export async function sendEmergencySmsAll({
+  user,
+  additionalContacts,
+  gas,
+  ppm,
+  signal,
+}) {
+  if (!ENDPOINT) {
+    return {
+      ok: false,
+      reason: "no-endpoint",
+      message: "SMS provider not configured for this build.",
+      results: [],
+      sent: 0,
+      total: 0,
+    };
+  }
+  const recipients = buildRecipients(user, additionalContacts);
+  if (recipients.length === 0) {
+    return {
+      ok: false,
+      reason: "no-recipients",
+      message: "No phone numbers to send to.",
+      results: [],
+      sent: 0,
+      total: 0,
+    };
+  }
+  const message = composeAlertMessage({ user, gas, ppm });
+
+  const results = await Promise.all(
+    recipients.map(async (r) => {
+      const result = await sendOne({
+        to: r.phone,
+        region: r.region,
+        message,
+        signal,
+      });
+      return { recipient: r, ...result };
+    })
+  );
+  const sent = results.filter((r) => r.ok).length;
+  return {
+    ok: sent > 0,
+    results,
+    sent,
+    total: recipients.length,
+  };
+}
+
+// Legacy single-recipient wrapper, kept so existing callers keep working.
+export async function sendEmergencySms({ user, gas, ppm, signal }) {
+  const out = await sendEmergencySmsAll({
+    user,
+    additionalContacts: [],
+    gas,
+    ppm,
+    signal,
+  });
+  const me = out.results.find((r) => r.recipient.isSelf);
+  return me || { ok: out.ok, reason: out.reason, message: out.message };
 }
